@@ -5,6 +5,24 @@ Code for Team Imaginating's idea: a **Day-0 pricing engine** and a
 real costs plus the risk of RTOs and returns, never prices below break-even,
 and gives the seller simple Hinglish nudges.
 
+## Screenshots
+
+**Day-0 pricing screen.** You enter costs and get a launch price, the competitor band, return and RTO risk, a price slider and WhatsApp-style nudges.
+
+![Day-0 pricing screen](docs/images/day0-pricing.png)
+
+**Working nudge buttons.** In this run the seller adds a size chart (the product is re-priced), checks their own ₹240 against the floor, and lists the product.
+
+![Nudge actions in the chat panel](docs/images/nudge-actions.png)
+
+**Price slider on mobile.** Drag it to see the margin at any price against the break-even, floor and band top.
+
+<img src="docs/images/mobile.png" alt="Price slider on a phone" width="320">
+
+**Architecture page** (`docs/architecture.html`, served at `/architecture`).
+
+![Architecture page](docs/images/architecture.png)
+
 ## Effort estimate
 
 | Scope | What it includes | Effort |
