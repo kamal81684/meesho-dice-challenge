@@ -79,3 +79,30 @@ over 150 simulated days, averaged across 20 random seeds:
 > These numbers come from a **synthetic** market model (`vyapar_ai/simulator.py`),
 > not real Meesho data. They show the mechanism works; they are not a claim
 > about real-world impact.
+
+## Jev decision layer (`vyapar_ai/decision.py`)
+
+[Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) is TypeSafe AI's
+System One model: unstructured state in, typed decisions with calibrated
+confidence out. Vyapar-AI sends it these questions in one call:
+
+| Question | Type | Effect |
+|---|---|---|
+| `listing_ambiguity` | Score 1–5 | Scales the predicted return rate (0.85× to 1.15×), the "visual ambiguity score" from Slide 6 |
+| `return_reason` | Choice | Reads buyer comments (Hindi, Hinglish or English) and puts the matching fix first (size chart, fabric card or photos) |
+| `lifecycle_stage` | Choice | `/api/lifecycle` uses it only at ≥ 70% confidence; otherwise the state machine decides |
+
+```bash
+export TYPESAFE_API_KEY=...        # early access: https://console.typesafe.ai
+export TYPESAFE_DEFAULT_MODEL=jev-latest
+```
+
+With no key set, or if the API fails, a deterministic rules backend answers the
+same questions, so pricing never blocks. Jev never sets a price itself: the
+P ≥ P₀ and P ≤ Pmax guardrails stay in code. `GET /api/health` reports which
+backend is active.
+
+## Architecture page
+
+`docs/architecture.html` is an interactive diagram of the whole system, also
+served at `http://127.0.0.1:8000/architecture`.

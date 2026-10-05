@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vyapar-AI Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a ledger-like engineering sheet. The pipeline reads left to right like a bill of costs, and each stage opens a detail strip below it. */
+:root {
+  --paper: #fbf7f9;
+  --sheet: #ffffff;
+  --ink: #2b0f2e;
+  --ink-soft: #6a5470;
+  --rule: #eadcec;
+  --plum: #6b1d6f;
+  --magenta: #d81b60;
+  --marigold: #e89a0c;
+  --leaf: #17844a;
+  --loss: #c62844;
+  --tint-plum: #f4e8f5;
+  --tint-mag: #fde9f0;
+  --tint-gold: #fdf3df;
+  --tint-leaf: #e5f4ea;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #170a19; --sheet: #211024; --ink: #f6e9f6; --ink-soft: #bba4bf; --rule: #3c2341;
+    --plum: #d79ad9; --magenta: #ff5c93; --marigold: #f4b53f; --leaf: #4cc583; --loss: #ff6b7f;
+    --tint-plum: #2f1733; --tint-mag: #3a1426; --tint-gold: #33260d; --tint-leaf: #11301f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #170a19; --sheet: #211024; --ink: #f6e9f6; --ink-soft: #bba4bf; --rule: #3c2341;
+  --plum: #d79ad9; --magenta: #ff5c93; --marigold: #f4b53f; --leaf: #4cc583; --loss: #ff6b7f;
+  --tint-plum: #2f1733; --tint-mag: #3a1426; --tint-gold: #33260d; --tint-leaf: #11301f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 15px/1.55 var(--font-body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 64px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(34px, 6vw, 60px); font-weight: 800; line-height: 1.02; }
+h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 700; }
+h3 { font-size: 17px; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font: 500 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--magenta); }
+.muted { color: var(--ink-soft); }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+section { display: grid; gap: 18px; }
+.sec-head { display: grid; gap: 8px; }
+
+/* Hero */
+.hero { display: grid; gap: 18px; }
+.hero h1 span { color: var(--magenta); }
+.hero .lede { font-size: 18px; color: var(--ink-soft); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 12px/1 var(--font-mono); padding: 7px 10px; border: 1px solid var(--rule); border-radius: 999px; background: var(--sheet); color: var(--ink-soft); }
+.chip b { color: var(--ink); font-weight: 500; }
+
+/* Pipeline */
+.pipe-scroll { overflow-x: auto; padding-bottom: 6px; }
+.pipe { display: grid; grid-template-columns: repeat(7, minmax(128px, 1fr)); gap: 0; min-width: 900px; position: relative; }
+.stage { appearance: none; border: 0; background: none; color: inherit; text-align: left; font: inherit; cursor: pointer;
+  padding: 0 10px 0 0; display: grid; grid-template-rows: auto auto 1fr; gap: 8px; position: relative; }
+.stage .num { font: 500 11px/1 var(--font-mono); color: var(--ink-soft); }
+.stage .box { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 12px; display: grid; gap: 6px; min-height: 128px;
+  transition: border-color .15s, transform .15s, background .15s; }
+.stage .box strong { font-family: var(--font-display); font-size: 15px; line-height: 1.2; }
+.stage .box small { color: var(--ink-soft); font-size: 12.5px; line-height: 1.4; }
+.stage .file { font: 400 11px/1.3 var(--font-mono); color: var(--plum); word-break: break-all; }
+.stage::after { content: ""; position: absolute; top: 74px; right: -1px; width: 12px; height: 2px; background: var(--rule); }
+.stage:last-child::after { display: none; }
+.stage:hover .box { border-color: var(--plum); }
+.stage:focus-visible { outline: none; }
+.stage:focus-visible .box { outline: 2px solid var(--magenta); outline-offset: 2px; }
+.stage[aria-pressed="true"] .box { border-color: var(--magenta); background: var(--tint-mag); transform: translateY(-2px); }
+.stage.guard .box { box-shadow: inset 0 -3px 0 var(--leaf); }
+
+.lane { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.lane-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+.lane-card { flex: 1 1 260px; min-width: 0; border: 1px dashed var(--rule); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; background: transparent; }
+.lane-card .tag { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.lane-card.data .tag { color: var(--plum); }
+.lane-card.jev { border-color: var(--marigold); }
+.lane-card.jev .tag { color: var(--marigold); }
+
+.detail { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+@media (max-width: 760px) { .detail { grid-template-columns: 1fr; } }
+.detail h3 { font-size: 20px; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; font-size: 14px; align-content: start; }
+.kv dt { font: 500 11px/1.9 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.kv dd { margin: 0; }
+
+/* Formula */
+.formula { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 22px; display: grid; gap: 20px; }
+.eq { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 15px; }
+.eq .lhs { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--plum); }
+.frac { display: inline-grid; text-align: center; min-width: 0; }
+.frac .top { padding: 0 6px 6px; border-bottom: 2px solid var(--ink); }
+.frac .bot { padding: 6px 6px 0; }
+.t-risk { color: var(--magenta); } .t-profit { color: var(--leaf); }
+.ledger-scroll { overflow-x: auto; }
+table.ledger { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+.ledger th, .ledger td { padding: 7px 10px; border-bottom: 1px solid var(--rule); text-align: left; }
+.ledger th { font: 500 11px/1.4 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.ledger td.n { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.ledger tr.total td { border-bottom: 0; font-weight: 600; }
+.ledger tr.total td.n { color: var(--plum); }
+
+/* Lifecycle */
+.life { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 18px; display: grid; gap: 14px; }
+.curve-scroll { overflow-x: auto; }
+.curve { display: block; width: 100%; min-width: 640px; height: auto; }
+.phases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 440px) { .phases { grid-template-columns: 1fr; } }
+.phase { display: grid; gap: 6px; align-content: start; padding-top: 10px; border-top: 3px solid var(--c); }
+.phase .days { font: 500 11px/1 var(--font-mono); color: var(--ink-soft); letter-spacing: .06em; }
+.phase h3 { color: var(--c); }
+.phase p { font-size: 13.5px; }
+.phase .margin { font: 500 12px/1.3 var(--font-mono); }
+.bandit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .bandit { grid-template-columns: 1fr; } }
+.bandit > div { border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
+.bandit .label { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--plum); }
+.arms { display: flex; gap: 6px; flex-wrap: wrap; }
+.arm { font: 500 12px/1 var(--font-mono); padding: 6px 8px; border-radius: 6px; background: var(--tint-plum); }
+.arm.blocked { background: transparent; border: 1px dashed var(--loss); color: var(--loss); text-decoration: line-through; }
+
+/* Backtest */
+.bt { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 860px) { .bt { grid-template-columns: 1fr; } }
+.metric { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 12px; align-content: start; }
+.metric h3 { font-size: 15px; }
+.bars { display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: 70px minmax(0, 1fr) 72px; gap: 8px; align-items: center; font-size: 13px; }
+.bar .track { position: relative; height: 14px; background: var(--tint-plum); border-radius: 3px; }
+.bar .fill { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.bar .val { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.bar .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink-soft); }
+.fill.manual { background: var(--ink-soft); } .fill.ai { background: var(--magenta); } .fill.neg { background: var(--loss); }
+.note { font-size: 13px; color: var(--ink-soft); border-left: 3px solid var(--marigold); padding-left: 12px; }
+
+/* Module map */
+.map-scroll { overflow-x: auto; background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; }
+table.map { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+.map th, .map td { padding: 10px 14px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.map th { font: 500 11px/1.4 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.map tr:last-child td { border-bottom: 0; }
+.map td:first-child { font-family: var(--font-mono); font-size: 13px; color: var(--plum); white-space: nowrap; }
+.pill { display: inline-block; font: 500 11px/1 var(--font-mono); padding: 4px 7px; border-radius: 999px; }
+.pill.built { background: var(--tint-leaf); color: var(--leaf); }
+.pill.planned { background: var(--tint-gold); color: var(--marigold); }
+
+footer { font-size: 13px; color: var(--ink-soft); border-top: 1px solid var(--rule); padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Meesho DICE Challenge S3 · Team Imaginating</span>
+    <h1>Vyapar-AI <span>architecture</span></h1>
+    <p class="lede">How a new-to-online seller's product photo and costs become a launch price that never sells below break-even, and how that price then moves through the product's life.</p>
+    <div class="facts">
+      <span class="chip"><b>Python</b> · FastAPI</span>
+      <span class="chip"><b>LightGBM</b> risk model</span>
+      <span class="chip"><b>LinUCB</b> bandit</span>
+      <span class="chip"><b>Jev</b> decision layer</span>
+      <span class="chip"><b>29</b> tests passing</span>
+      <span class="chip">MVP · synthetic data</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="pipe-h">
+    <div class="sec-head">
+      <span class="eyebrow">Day-0 pipeline · POST /api/day0</span>
+      <h2 id="pipe-h">From seller input to launch price</h2>
+      <p class="muted">Select a stage to see what it does, which file holds it, and what replaces it in the pilot.</p>
+    </div>
+    <div class="pipe-scroll">
+      <div class="pipe" id="pipe" role="group" aria-label="Day-0 pipeline stages"></div>
+    </div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+    <div class="lane">
+      <div class="lane-row">
+        <div class="lane-card data">
+          <span class="tag">Data in</span>
+          <strong>Synthetic catalog · <code>catalog.py</code></strong>
+          <small class="muted">3,000 listings across 9 sub-categories, with COD share, size-chart and fabric-card flags, and observed return and RTO rates. Stands in for Meesho catalog tables and Valmo delivery logs.</small>
+        </div>
+        <div class="lane-card jev">
+          <span class="tag">Decision layer · runs alongside stages 04 and 07</span>
+          <strong>Jev (TypeSafe System One) · <code>decision.py</code></strong>
+          <small class="muted">In one parallel call, Jev scores how ambiguous the listing is (1–5), which scales the predicted return rate. It also reads buyer comments in Hindi, Hinglish or English to find the main return reason, which decides the first fix to suggest. With <code>TYPESAFE_API_KEY</code> unset or the API down, a rules backend answers instead. Jev never overrides P ≥ P₀.</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="eq-h">
+    <div class="sec-head">
+      <span class="eyebrow">pricing.py · floor_price()</span>
+      <h2 id="eq-h">The 0%-commission floor P₀</h2>
+      <p class="muted">Every risk cost is priced in before the first parcel ships. Below P₀ the seller misses their target, and below break-even every order loses money.</p>
+    </div>
+    <div class="formula">
+      <div class="eq" role="math" aria-label="P0 equals costs plus expected risk plus target profit, divided by one minus tax rate">
+        <span class="lhs">P₀ =</span>
+        <span class="frac">
+          <span class="top">COGS + Labour + Packaging + Fees + <span class="t-risk">r<sub>rto</sub>·C<sub>rto</sub> + r<sub>ret</sub>·C<sub>damage</sub></span> + <span class="t-profit">Target</span></span>
+          <span class="bot">1 − (GST + TCS/TDS)</span>
+        </span>
+      </div>
+      <div class="ledger-scroll">
+        <table class="ledger">
+          <thead><tr><th>Cotton kurti · Slide 3 worked example</th><th class="n">Input</th><th class="n">₹ per unit</th></tr></thead>
+          <tbody>
+            <tr><td>Fabric (COGS)</td><td class="n">—</td><td class="n">150.00</td></tr>
+            <tr><td>Labour</td><td class="n">—</td><td class="n">20.00</td></tr>
+            <tr><td>Packaging</td><td class="n">—</td><td class="n">10.00</td></tr>
+            <tr><td class="t-risk">Expected RTO cost</td><td class="n">0.21 × ₹90</td><td class="n">18.90</td></tr>
+            <tr><td class="t-profit">Target profit</td><td class="n">—</td><td class="n">40.00</td></tr>
+            <tr><td>Numerator</td><td class="n"></td><td class="n">238.90</td></tr>
+            <tr><td>÷ (1 − 7% tax)</td><td class="n">0.93</td><td class="n">256.88</td></tr>
+            <tr class="total"><td>Launch price: P₀ + 3% wedge, rounded to a ₹…9 price, inside band ₹250–₹299</td><td class="n"></td><td class="n">269</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="life-h">
+    <div class="sec-head">
+      <span class="eyebrow">lifecycle.py · bandit.py · POST /api/lifecycle</span>
+      <h2 id="life-h">Lifecycle engine</h2>
+      <p class="muted">A state machine reads sales signals and picks the stage. In the Scale stage a LinUCB bandit nudges price, and guardrails remove any move outside P₀ to Pmax.</p>
+    </div>
+    <div class="life">
+      <div class="curve-scroll">
+        <svg class="curve" viewBox="0 0 800 150" role="img" aria-label="Illustrative price path: launch at P0 plus 3 percent, nudged up during scale, held during defense, dropped below P0 in salvage">
+          <line x1="20" y1="100" x2="780" y2="100" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 4"/>
+          <text x="24" y="116" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace" font-size="11">P₀ floor</text>
+          <line x1="20" y1="30" x2="780" y2="30" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 4"/>
+          <text x="24" y="24" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace" font-size="11">Pmax · band top</text>
+          <line x1="210" y1="14" x2="210" y2="140" stroke="var(--rule)"/>
+          <line x1="400" y1="14" x2="400" y2="140" stroke="var(--rule)"/>
+          <line x1="590" y1="14" x2="590" y2="140" stroke="var(--rule)"/>
+          <path d="M30 92 L200 92 L215 84 L235 84 L240 72 L265 72 L270 62 L300 62 L305 48 L330 48 L335 38 L400 38 L590 38 L600 118 L770 118"
+                fill="none" stroke="var(--magenta)" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="30" cy="92" r="5" fill="var(--magenta)"/>
+          <circle cx="400" cy="38" r="5" fill="var(--marigold)"/>
+          <circle cx="770" cy="118" r="5" fill="var(--plum)"/>
+          <text x="40" y="84" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="11">P₀ + 3%</text>
+          <text x="610" y="140" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="11">P₀ − shipping buffer</text>
+        </svg>
+      </div>
+      <div class="phases">
+        <div class="phase" style="--c: var(--magenta)"><span class="days">DAYS 1–21</span><h3>Launch</h3><p>Zero reviews. Launch wedge at P₀ + 3% to seed the first 25 orders.</p><span class="margin">target margin 3–5%</span></div>
+        <div class="phase" style="--c: var(--plum)"><span class="days">DAYS 22–90</span><h3>Scale</h3><p>Rating and conversion hold. The bandit nudges price by +₹10 or +₹25 each cycle.</p><span class="margin">target margin 15–20%</span></div>
+        <div class="phase" style="--c: var(--marigold)"><span class="days">DAYS 91–180</span><h3>Defense</h3><p>A rival undercuts by 6% or more, or conversion drops 15%. Hold price and offer 2- and 3-packs.</p><span class="margin">target margin 10–12%</span></div>
+        <div class="phase" style="--c: var(--loss)"><span class="days">DAY 181+ OR STALE</span><h3>Salvage</h3><p>Fewer than 2 sales a week and stock older than 120 days. Drop below P₀ to free up cash.</p><span class="margin">target margin −5% to 0%</span></div>
+      </div>
+      <div class="bandit">
+        <div><span class="label">Context x<sub>t</sub></span><p>Seller rating, category RTO trend, weekly order velocity, search rank, price relative to the market median.</p></div>
+        <div><span class="label">Arms · price at ₹389, Pmax ₹399</span>
+          <div class="arms"><span class="arm">−₹10</span><span class="arm">hold</span><span class="arm">+₹10</span><span class="arm blocked" title="Blocked: would exceed Pmax">+₹25</span></div>
+          <p class="muted" style="font-size:13px">Any arm that would leave P₀–Pmax is removed before scoring.</p></div>
+        <div><span class="label">Reward R<sub>t</sub></span><p class="mono">orders × (price·(1−tax) − unit cost) − reverse-logistics loss</p><p class="muted" style="font-size:13px">Net cash, not order count.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="bt-h">
+    <div class="sec-head">
+      <span class="eyebrow">scripts/backtest.py · Slide 8 scenario</span>
+      <h2 id="bt-h">Surat cotton suit backtest</h2>
+      <p class="muted">Same simulated market for both sellers, 150 days, averaged over 20 random seeds. Manual seller: ₹349 by offline markup, no fabric card, raises to ₹399 on day 120. Vyapar-AI: launches at ₹379 (P₀ = ₹367), adds the fabric card on Day 0, and the bandit climbs inside the band.</p>
+    </div>
+    <div class="bt" id="bt"></div>
+    <p class="note">These results come from a synthetic market model. They show the mechanism works; they are not a forecast of real Meesho impact.</p>
+  </section>
+
+  <section aria-labelledby="map-h">
+    <div class="sec-head">
+      <span class="eyebrow">Repository map</span>
+      <h2 id="map-h">Modules, MVP stand-ins and pilot upgrades</h2>
+    </div>
+    <div class="map-scroll">
+      <table class="map">
+        <thead><tr><th>Module</th><th>Responsibility</th><th>MVP</th><th>Pilot upgrade</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>pricing.py</td><td>P₀ floor, break-even, launch wedge, ₹…9 rounding, band clamp</td><td>Exact formula</td><td>Live fee tables per category</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>catalog.py</td><td>Listing schema and data source</td><td>Synthetic generator</td><td>Catalog tables and Valmo logs</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>retrieval.py</td><td>Embeddings, similar listings, competitor band, fallback</td><td>Hashed text + attributes, numpy cosine</td><td>CLIP 512-d + FAISS</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>risk.py</td><td>Return and RTO prediction, lever impacts</td><td>LightGBM on synthetic data</td><td>Daily retrain on real returns</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>lifecycle.py</td><td>Stage detection, stage actions, bundles</td><td>Rule state machine; Jev overrides when ≥ 70% confident</td><td>Tune the threshold on real outcomes</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>bandit.py</td><td>LinUCB with P₀ and Pmax guardrails</td><td>Disjoint LinUCB</td><td>Online per-seller state in Redis</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>nudges.py</td><td>Hinglish action cards</td><td>Templates</td><td>Indic-BERT + WhatsApp Business API</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>simulator.py</td><td>Market simulation for backtests</td><td>Poisson demand, binomial RTO and returns</td><td>Replay of real order logs</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>decision.py</td><td>Listing ambiguity, return reason, stage, each with calibrated confidence</td><td>Jev via typesafe-sdk; rules fallback</td><td>Feed Jev the listing photos and real buyer comments</td><td><span class="pill built">built</span></td></tr>
+          <tr><td>api/main.py</td><td>/api/day0, /api/lifecycle, web UI</td><td>FastAPI</td><td>Supplier Panel integration</td><td><span class="pill built">built</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Source: <span class="mono">rk4u00/meesho-dice-challenge</span>, branch <span class="mono">claude/happy-hopper-00273e</span>. Numbers come from the repo's tests and backtest script.</footer>
+</div>
+
+<script>
+const STAGES = [
+  { t: "Seller input", s: "Title, photos, costs, weight", f: "web/index.html",
+    what: "The seller enters a product title, attributes and per-unit costs: fabric, labour, packaging and target profit. Weight sets the shipping slab used for the RTO penalty.",
+    mvp: "Form posts JSON to /api/day0", pilot: "Supplier Panel listing flow with photo upload", out: "SellerProduct" },
+  { t: "Embed", s: "Product to vector", f: "retrieval.py · Embedder",
+    what: "Turns title words and attributes (fabric, pattern, colour) into one unit vector so similar products land near each other.",
+    mvp: "Hashed bag-of-words plus weighted attribute one-hots (~277 dims)", pilot: "CLIP 512-d image + text embeddings", out: "query vector" },
+  { t: "Similar listings", s: "Market band & risk priors", f: "retrieval.py · SimilarityIndex",
+    what: "Finds the 20 closest listings and computes the median price, a 20th–80th percentile competitor band, and their return and RTO rates. If a sub-category has fewer than 8 good matches, it falls back to the category, then globally, and widens the band.",
+    mvp: "Exact cosine search in numpy", pilot: "FAISS index over the live catalog, cached in Redis", out: "MarketSnapshot" },
+  { t: "Risk model", s: "Return & RTO probability", f: "risk.py · RiskModel",
+    what: "Two gradient-boosted regressors predict this product's return rate and RTO rate from relative price, COD share, size chart, fabric card, photo count, rating and sub-category. It also re-scores the listing with each fix applied to estimate how much returns would fall.",
+    mvp: "LightGBM trained on the synthetic catalog; Jev's ambiguity score scales the return rate (0.85× to 1.15×)", pilot: "Daily retrain on Valmo delivery and return history", out: "r_ret, r_rto, levers" },
+  { t: "Floor P₀", s: "Break-even + target", f: "pricing.py · floor_price",
+    what: "Adds expected RTO and return costs to the real unit costs and target profit, then grosses up for GST and TCS/TDS. Also reports the true break-even, which is P₀ without profit.",
+    mvp: "Exact Slide 3 equation, tested against both worked examples", pilot: "Live fee and tax tables per category", out: "P₀, break-even" },
+  { t: "Launch price", s: "Wedge, band, guardrail", f: "pricing.py · recommend_launch_price", guard: true,
+    what: "Starts at P₀ + 3%, rounds up to a ₹…9 price, lifts it to the band floor if there is room, and caps it at the band top when possible. Hard rule: never below P₀. If P₀ sits above the whole band, it warns the seller instead of pricing at a loss.",
+    mvp: "Deterministic rules", pilot: "Same rules plus A/B harness", out: "Recommendation" },
+  { t: "Nudges", s: "Hinglish action cards", f: "nudges.py",
+    what: "Writes the launch-price card and the top two listing fixes in Hinglish, each with one-tap actions such as Accept ₹289 or Add size chart.",
+    mvp: "Templates; Jev's return-reason call orders the listing fixes", pilot: "Indic-BERT translation and WhatsApp Business API webhook", out: "action cards" },
+];
+const pipe = document.getElementById("pipe");
+const detail = document.getElementById("detail");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function show(i) {
+  pipe.querySelectorAll(".stage").forEach((b, j) => b.setAttribute("aria-pressed", String(i === j)));
+  const s = STAGES[i];
+  detail.innerHTML = `
+    <div style="display:grid;gap:8px;min-width:0">
+      <span class="eyebrow">Stage ${i + 1} of ${STAGES.length}</span>
+      <h3>${esc(s.t)}</h3>
+      <p>${esc(s.what)}</p>
+    </div>
+    <dl class="kv">
+      <dt>File</dt><dd class="mono">${esc(s.f)}</dd>
+      <dt>MVP</dt><dd>${esc(s.mvp)}</dd>
+      <dt>Pilot</dt><dd>${esc(s.pilot)}</dd>
+      <dt>Output</dt><dd class="mono">${esc(s.out)}</dd>
+    </dl>`;
+}
+STAGES.forEach((s, i) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "stage" + (s.guard ? " guard" : "");
+  b.innerHTML = `<span class="num">${String(i + 1).padStart(2, "0")}</span>
+    <span class="box"><strong>${esc(s.t)}</strong><small>${esc(s.s)}</small><span class="file">${esc(s.f)}</span></span>`;
+  b.addEventListener("click", () => show(i));
+  pipe.appendChild(b);
+});
+show(5);
+
+const BT = [
+  { h: "Cash after the first 100 orders", unit: "₹", manual: -664, ai: 3697, fmt: v => (v < 0 ? "−₹" : "₹") + Math.abs(v).toLocaleString("en-IN"), signed: true },
+  { h: "Day the final price is reached", manual: 120, ai: 26, fmt: v => "day " + v, max: 150 },
+  { h: "Day cash-positive for good", manual: 113, ai: 6, fmt: v => "day " + v, max: 150 },
+];
+document.getElementById("bt").innerHTML = BT.map(m => {
+  const row = (label, v, cls) => {
+    let style;
+    if (m.signed) {
+      const lo = -1000, hi = 4000, span = hi - lo, z = (-lo / span) * 100;
+      const w = Math.abs(v) / span * 100;
+      style = v >= 0 ? `left:${z}%;width:${w}%` : `left:${z - w}%;width:${w}%`;
+      return `<div class="bar"><span>${label}</span><span class="track"><span class="zero" style="left:${z}%"></span><span class="fill ${v < 0 ? "neg" : cls}" style="${style}"></span></span><span class="val">${m.fmt(v)}</span></div>`;
+    }
+    style = `left:0;width:${v / m.max * 100}%`;
+    return `<div class="bar"><span>${label}</span><span class="track"><span class="fill ${cls}" style="${style}"></span></span><span class="val">${m.fmt(v)}</span></div>`;
+  };
+  return `<div class="metric"><h3>${m.h}</h3><div class="bars">${row("Manual", m.manual, "manual")}${row("Vyapar-AI", m.ai, "ai")}</div></div>`;
+}).join("");
+</script>
+</body>
+</html>
