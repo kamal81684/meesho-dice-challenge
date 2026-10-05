@@ -79,12 +79,14 @@ class LifecycleRequest(BaseModel):
 
 @app.get("/", include_in_schema=False)
 def index():
-    return FileResponse(WEB / "index.html")
+    # no-store so a redeploy (or a code change) is picked up instead of a
+    # stale cached page being served to the browser.
+    return FileResponse(WEB / "index.html", headers={"Cache-Control": "no-store"})
 
 
 @app.get("/architecture", include_in_schema=False)
 def architecture():
-    return FileResponse(DOCS / "architecture.html")
+    return FileResponse(DOCS / "architecture.html", headers={"Cache-Control": "no-store"})
 
 
 def _engine_ready() -> bool:
