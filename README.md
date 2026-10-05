@@ -1,0 +1,52 @@
+# Vyapar-AI — Pricing Across a Product's Lifecycle (Meesho DICE S3)
+
+Code for Team Imaginating's idea: a **Day-0 pricing engine** and a
+**lifecycle re-pricing engine** for new-to-online sellers. It starts from
+real costs plus the risk of RTOs and returns, never prices below break-even,
+and gives the seller simple Hinglish nudges.
+
+## Effort estimate
+
+| Scope | What it includes | Effort |
+|---|---|---|
+| **MVP (this repo)** | P₀ floor equation, synthetic catalog, similar-listing retrieval + competitor band, return/RTO risk model, lifecycle state machine, LinUCB bandit with guardrails, Hinglish nudges, FastAPI + web UI, Surat backtest simulation | ~1–2 dev-days for a solo dev with an AI assistant; ~1 week for a student team |
+| **Pilot** | Real CLIP image embeddings + FAISS, real Meesho catalog/return data, LightGBM retrained daily, WhatsApp Business API, Indic-BERT translation, A/B harness | 3–4 weeks, 2 DS + 1 MLOps (matches Slide 6) |
+| **Production** | Integration with the Supplier Panel and pricing service, monitoring, drift detection, a seller-consent flow, scale-out | 2–3 months |
+
+### MVP simplifications (versus the deck)
+
+| Deck component | MVP stand-in | How to upgrade |
+|---|---|---|
+| CLIP 512-d multimodal vectors | Hashed text + attribute vectors (numpy) | Swap the `Embedder` for `open_clip` |
+| FAISS vector index | Exact cosine search in numpy | Change `SimilarityIndex` to use `faiss.IndexFlatIP` |
+| Meesho catalog & Valmo logs | Synthetic generator with realistic distributions | Load the real tables into the same `Listing` schema |
+| LightGBM risk model | LightGBM (scikit-learn fallback), trained on synthetic data | Retrain on real return history |
+| WhatsApp + Indic-BERT | Hinglish templates + a `/nudges` endpoint | Webhook to the WhatsApp Business API |
+
+## Layout
+
+```
+vyapar_ai/
+  pricing.py     P0 floor equation, launch wedge, guardrails
+  catalog.py     synthetic catalog generator (Listing schema)
+  retrieval.py   embedder + similarity index + competitor band, with category fallback
+  risk.py        return/RTO risk model
+  lifecycle.py   Launch → Scale → Defense → Salvage state machine
+  bandit.py      LinUCB contextual bandit with P0 / Pmax guardrails
+  nudges.py      Hinglish WhatsApp-style action cards
+  engine.py      orchestrates the Day-0 pipeline (Slide 6 flow)
+  simulator.py   market simulator used for the backtest
+api/main.py      FastAPI service + serves the web UI
+web/index.html   Day-0 listing interface (Slide 5 wireframe)
+scripts/backtest.py  Surat cotton-suit backtest (Slide 8)
+tests/           unit tests (worked examples from Slide 3 included)
+```
+
+## Quick start
+
+```bash
+pip install -r requirements.txt
+pytest -q
+uvicorn api.main:app --reload     # open http://127.0.0.1:8000
+python scripts/backtest.py
+```
