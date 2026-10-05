@@ -1,6 +1,8 @@
 """FastAPI microservice for Vyapar-AI (Slide 6: "Real-time FastAPI microservice")."""
 from __future__ import annotations
 
+import json
+import logging
 from typing import Optional
 
 from functools import lru_cache
@@ -20,6 +22,7 @@ from vyapar_ai import vision
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 DOCS = ROOT / "docs"
+logger = logging.getLogger("uvicorn.error")
 
 # Jev's stage call is used only when it is at least this confident;
 # otherwise the deterministic state machine decides.
@@ -136,7 +139,9 @@ def analyze_photos(files: list[UploadFile] = File(...), seller_name: str = Form(
         photos = vision.load_photos(raw)
     except vision.PhotoError as e:
         raise HTTPException(422, str(e)) from None
-    return vision.analyze_photos(photos, vision_extractor(), seller_name).to_dict()
+    result = vision.analyze_photos(photos, vision_extractor(), seller_name).to_dict()
+    logger.info("Photo analysis output:\n%s", json.dumps(result, ensure_ascii=False, indent=2))
+    return result
 
 
 @app.get("/api/subcategories")

@@ -331,7 +331,21 @@ class ChatCompletionsVLM:
         return body
 
     def _post(self, body: dict) -> dict:
+        import httpx
+
         r = self.client.post(self.url, headers=self.headers, json=body)
+        if r.is_error:
+            # Include the provider's explanation, not just its HTTP status.
+            try:
+                error = r.json().get("error", {})
+                detail = error.get("message", "") if isinstance(error, dict) else ""
+            except (ValueError, AttributeError):
+                detail = ""
+            if detail:
+                key = self.headers["Authorization"].removeprefix("Bearer ")
+                detail = str(detail).replace(key, "[REDACTED]") if key else str(detail)
+                raise httpx.HTTPStatusError(
+                    f"HTTP {r.status_code}: {detail[:240]}", request=r.request, response=r)
         r.raise_for_status()
         text = r.json()["choices"][0]["message"]["content"]
         return _clean(_parse_json(text))
