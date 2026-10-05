@@ -18,7 +18,10 @@ import io
 import json
 import os
 import re
+import time
+import uuid
 from dataclasses import dataclass, field
+from html import unescape
 from typing import Any, Optional, Protocol
 
 import numpy as np
@@ -52,12 +55,15 @@ class Photo:
     name: str
     image: Image.Image     # RGB, EXIF-rotated
 
-    def jpeg_b64(self, max_side: int = VLM_MAX_SIDE) -> str:
+    def jpeg_bytes(self, max_side: int = VLM_MAX_SIDE) -> bytes:
         img = self.image.copy()
         img.thumbnail((max_side, max_side))
         buf = io.BytesIO()
         img.save(buf, format="JPEG", quality=85)
-        return base64.b64encode(buf.getvalue()).decode("ascii")
+        return buf.getvalue()
+
+    def jpeg_b64(self, max_side: int = VLM_MAX_SIDE) -> str:
+        return base64.b64encode(self.jpeg_bytes(max_side)).decode("ascii")
 
 
 def load_photos(files: list[tuple[str, bytes]]) -> list[Photo]:
@@ -305,10 +311,15 @@ class ChatCompletionsVLM:
         self.client = client or httpx.Client(timeout=timeout)
         self.last_error: Optional[str] = None
 
-    def build_request(self, photos: list[Photo], json_schema: Optional[bool] = None) -> dict:
+    def build_request(self, photos: list[Photo], json_schema: Optional[bool] = None,
+                      context: Optional[str] = None) -> dict:
         if json_schema is None:
             json_schema = self.json_schema
-        content: list[dict] = [{"type": "text", "text": PROMPT}]
+        text = PROMPT
+        if context:
+            text += ("\n\nText read from the photos by the OCR step (partial; the images are "
+                     "the source of truth, use this only as a hint):\n" + context)
+        content: list[dict] = [{"type": "text", "text": text}]
         for p in photos:
             content.append({"type": "image_url", "image_url": {
                 "url": f"data:image/jpeg;base64,{p.jpeg_b64()}"}})
@@ -325,10 +336,10 @@ class ChatCompletionsVLM:
         text = r.json()["choices"][0]["message"]["content"]
         return _clean(_parse_json(text))
 
-    def extract(self, photos: list[Photo]) -> Optional[dict]:
+    def extract(self, photos: list[Photo], context: Optional[str] = None) -> Optional[dict]:
         self.last_error = None
         try:
-            return self._post(self.build_request(photos))
+            return self._post(self.build_request(photos, context=context))
         except Exception as first:  # noqa: BLE001 - may be a json_schema rejection
             if not self.json_schema:
                 self.last_error = f"{type(first).__name__}: {first}"[:300]
@@ -336,7 +347,7 @@ class ChatCompletionsVLM:
             # Some OpenAI-compatible endpoints/models reject response_format
             # json_schema (e.g. HTTP 400). Retry ONCE without it before giving up.
             try:
-                result = self._post(self.build_request(photos, json_schema=False))
+                result = self._post(self.build_request(photos, json_schema=False, context=context))
             except Exception:
                 # Both attempts failed: surface the original error, keep it recorded.
                 self.last_error = f"{type(first).__name__}: {first}"[:300]
@@ -362,13 +373,160 @@ class FallbackExtractor:
             return None
 
 
+DOC_AI_DEFAULT_BASE = "https://api.sarvam.ai"
+
+
+def _html_to_text(html: str) -> str:
+    """Visible text from a Doc-AI HTML page: drops tags, styles, scripts and images."""
+    s = re.sub(r"<(script|style)\b.*?</\1>", " ", html, flags=re.S | re.I)
+    s = re.sub(r"<img\b[^>]*>", " ", s, flags=re.I)
+    s = re.sub(r"<(br|hr)\s*/?>", "\n", s, flags=re.I)
+    s = re.sub(r"</(p|div|li|tr|h[1-6]|figure|table)>", "\n", s, flags=re.I)
+    s = re.sub(r"<[^>]+>", " ", s)
+    s = unescape(s)
+    s = re.sub(r"[ \t\r\f\v]+", " ", s)
+    s = re.sub(r"\n\s*\n+", "\n", s)
+    return s.strip()
+
+
+class DocAiDigitizer:
+    """Sarvam Doc-AI job API: submit a photo, poll it, fetch the rendered output.
+
+    POST {base}/doc-ai/v1/job/digitise          multipart + Idempotency-Key -> {job_id}
+    GET  {base}/doc-ai/v1/job/{id}/status       -> {status, usage, ...}
+    GET  {base}/doc-ai/v1/job/{id}/download-url -> {method, url, headers}
+    """
+
+    TERMINAL = {"completed", "partially_completed", "failed", "rejected"}
+    OK = {"completed", "partially_completed"}
+
+    def __init__(self, api_key: str, base_url: str = DOC_AI_DEFAULT_BASE,
+                 language: str = "hi-IN", output_format: str = "html",
+                 content_type: str = "printed", auto_orient: bool = True,
+                 timeout: float = 60.0, poll_interval: float = 1.5,
+                 max_wait: float = 120.0, client: Any = None, sleep: Any = None):
+        import httpx
+        self.base = base_url.rstrip("/")
+        self.key = api_key
+        self.language = language
+        self.output_format = output_format
+        self.content_type = content_type
+        self.auto_orient = auto_orient
+        self.poll_interval = poll_interval
+        self.max_wait = max_wait
+        self.client = client or httpx.Client(timeout=timeout)
+        self.sleep = sleep or time.sleep
+
+    def _headers(self, extra: Optional[dict] = None) -> dict:
+        h = {"api-subscription-key": self.key}
+        if extra:
+            h.update(extra)
+        return h
+
+    def submit(self, photo: Photo) -> str:
+        r = self.client.post(
+            self.base + "/doc-ai/v1/job/digitise",
+            headers=self._headers({"Idempotency-Key": uuid.uuid4().hex}),
+            data={"language": self.language, "output_format": self.output_format,
+                  "content_type": self.content_type,
+                  "auto_orient": "true" if self.auto_orient else "false"},
+            files={"file": (photo.name or "photo.jpg", photo.jpeg_bytes(), "image/jpeg")},
+        )
+        r.raise_for_status()
+        return r.json()["job_id"]
+
+    def wait(self, job_id: str) -> dict:
+        deadline = time.monotonic() + self.max_wait
+        while True:
+            r = self.client.get(f"{self.base}/doc-ai/v1/job/{job_id}/status",
+                                headers=self._headers())
+            r.raise_for_status()
+            status = r.json()
+            if str(status.get("status", "")).lower() in self.TERMINAL:
+                return status
+            if time.monotonic() > deadline:
+                raise TimeoutError(f"Doc-AI job {job_id} did not finish in {self.max_wait}s")
+            self.sleep(self.poll_interval)
+
+    def download(self, job_id: str) -> str:
+        r = self.client.get(f"{self.base}/doc-ai/v1/job/{job_id}/download-url",
+                            headers=self._headers())
+        r.raise_for_status()
+        spec = r.json()
+        d = self.client.get(spec["url"], headers=spec.get("headers") or {})
+        d.raise_for_status()
+        return d.text
+
+    def digitise(self, photo: Photo) -> str:
+        """Run the whole job for one photo and return the rendered HTML."""
+        job_id = self.submit(photo)
+        status = self.wait(job_id)
+        if str(status.get("status", "")).lower() not in self.OK:
+            raise RuntimeError(f"Doc-AI job {job_id} ended as {status.get('status')}")
+        return self.download(job_id)
+
+
+class DocAiLLMExtractor:
+    """Doc-AI digitise -> LLM extraction.
+
+    Each photo is digitised by the Doc-AI job API; the text it reads (fabric/GSM
+    labels, size charts, any printed matter) is handed to the chat model together
+    with the photos, so the model gets both the OCR text and the image.
+    """
+
+    def __init__(self, digitizer: DocAiDigitizer, vlm: "ChatCompletionsVLM",
+                 max_photos: int = 3, max_chars: int = 4000):
+        self.digitizer = digitizer
+        self.vlm = vlm
+        self.max_photos = max_photos
+        self.max_chars = max_chars
+        self.name = "doc-ai+llm"
+        self.last_error: Optional[str] = None
+
+    def ocr_text(self, photos: list[Photo]) -> str:
+        chunks: list[str] = []
+        for p in photos[: self.max_photos]:
+            try:
+                text = _html_to_text(self.digitizer.digitise(p))
+                if text:
+                    chunks.append(f"[{p.name}] {text}")
+            except Exception as e:  # noqa: BLE001 - OCR is only a hint; never block the answer
+                chunks.append(f"[{p.name}] (Doc-AI failed: {type(e).__name__})")
+        return "\n".join(chunks)[: self.max_chars]
+
+    def extract(self, photos: list[Photo]) -> Optional[dict]:
+        self.last_error = None
+        context = self.ocr_text(photos)
+        return self.vlm.extract(photos, context=context or None)
+
+
 def default_extractor() -> VisionExtractor:
+    """Pick the best configured extractor.
+
+    Doc-AI digitise + LLM when both a Doc-AI key and a chat model are set;
+    otherwise the chat model on its own; otherwise pixel checks only.
+    """
     model, key = os.getenv("VISION_MODEL"), os.getenv("VISION_API_KEY")
-    if model and key:
-        base = os.getenv("VISION_API_BASE", "https://api.sarvam.ai/v1")
-        schema = os.getenv("VISION_JSON_SCHEMA", "1") not in ("0", "false", "no")
-        return FallbackExtractor(ChatCompletionsVLM(base, model, key, json_schema=schema))
-    return NoModelExtractor()
+    if not (model and key):
+        return NoModelExtractor()
+    base = os.getenv("VISION_API_BASE", "https://api.sarvam.ai/v1")
+    schema = os.getenv("VISION_JSON_SCHEMA", "1") not in ("0", "false", "no")
+    vlm = ChatCompletionsVLM(base, model, key, json_schema=schema)
+    doc_key = os.getenv("DOC_AI_API_KEY") or os.getenv("SARVAM_API_KEY")
+    doc_on = os.getenv("DOC_AI_ENABLED", "1") not in ("0", "false", "no")
+    if doc_key and doc_on:
+        try:
+            max_photos = int(os.getenv("DOC_AI_MAX_PHOTOS", "3"))
+        except ValueError:
+            max_photos = 3
+        digitizer = DocAiDigitizer(
+            doc_key,
+            base_url=os.getenv("DOC_AI_API_BASE", DOC_AI_DEFAULT_BASE),
+            language=os.getenv("DOC_AI_LANGUAGE", "hi-IN"),
+            content_type=os.getenv("DOC_AI_CONTENT_TYPE", "printed"),
+        )
+        return FallbackExtractor(DocAiLLMExtractor(digitizer, vlm, max_photos=max_photos))
+    return FallbackExtractor(vlm)
 
 
 # ------------------------------------------------------------------ result

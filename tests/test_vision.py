@@ -145,3 +145,60 @@ def room_photo(garment_rgb, size=(300, 450)):
 def test_dominant_color_in_a_room_photo(rgb, name):
     # Regression: a pink kurti against an off-white wall used to come out "white".
     assert vision.dominant_color(room_photo(rgb)) == name
+
+
+def test_doc_ai_digitise_then_llm():
+    from vyapar_ai.vision import ChatCompletionsVLM, DocAiDigitizer, DocAiLLMExtractor
+    seen = {"submit": None, "chat": None}
+    html_page = ("<html><head><style>b{}</style></head><body>"
+                 "<div class='page-body-container'><p class='paragraph'>100% Cotton, "
+                 "GSM 180, Made in India</p></div></body></html>")
+
+    def handler(request):
+        url = str(request.url)
+        if url.endswith("/doc-ai/v1/job/digitise"):
+            seen["submit"] = request
+            return httpx.Response(201, json={"job_id": "job-1", "status": "pending", "run_id": "r1"})
+        if url.endswith("/doc-ai/v1/job/job-1/status"):
+            return httpx.Response(200, json={"status": "completed", "usage": {"pages_total": 1}})
+        if url.endswith("/doc-ai/v1/job/job-1/download-url"):
+            return httpx.Response(200, json={"method": "GET", "url": "https://cdn.example/out.html",
+                                             "headers": {}, "expires_at": "x"})
+        if url == "https://cdn.example/out.html":
+            return httpx.Response(200, text=html_page)
+        if url.endswith("/chat/completions"):
+            seen["chat"] = json.loads(request.content)
+            return httpx.Response(200, json={"choices": [{"message": {"content": json.dumps(MODEL_JSON)}}]})
+        return httpx.Response(404)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    digitizer = DocAiDigitizer("test-key", client=client, sleep=lambda s: None)
+    vlm = ChatCompletionsVLM("https://api.sarvam.ai/v1", "my-sarvam-vlm", "key", client=client)
+    report = analyze_photos([Photo("a", garment((240, 120, 170)))], DocAiLLMExtractor(digitizer, vlm), "Ramesh")
+
+    body = seen["submit"].content
+    assert b'name="language"' in body and b"hi-IN" in body
+    assert b'name="output_format"' in body and b"html" in body
+    assert b'name="file"' in body
+    assert seen["submit"].headers.get("api-subscription-key") == "test-key"
+    assert seen["submit"].headers.get("idempotency-key")
+    parts = seen["chat"]["messages"][0]["content"]
+    assert "GSM 180" in parts[0]["text"] and "Cotton" in parts[0]["text"]
+    assert report.backend == "doc-ai+llm"
+    assert report.suggested["subcategory"] == "kurti"
+
+
+def test_doc_ai_failure_still_answers_via_pixel_checks():
+    from vyapar_ai.vision import ChatCompletionsVLM, DocAiDigitizer, DocAiLLMExtractor
+
+    def handler(request):
+        if "/doc-ai/" in str(request.url):
+            return httpx.Response(500, text="boom")
+        return httpx.Response(404)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    ext = FallbackExtractor(DocAiLLMExtractor(DocAiDigitizer("k", client=client, sleep=lambda s: None),
+                                              ChatCompletionsVLM("https://x/v1", "m", "k", client=client)))
+    report = analyze_photos([Photo("a", garment((30, 60, 180)))], ext)
+    assert report.backend.startswith("pixel-checks")
+    assert report.suggested["color"] == "blue"

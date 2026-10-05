@@ -834,7 +834,7 @@ button { cursor: pointer; }
     var n = d.photos ? d.photos.length : photos.length;
     var chips = [s.subcategory && s.subcategory.replaceAll("_", " "), s.fabric, s.pattern, s.color].filter(Boolean);
     var html = "<b>" + esc(n === 1 ? T("detectedFrom1") : TF("detectedFrom", { n: n })) + "</b>: " + (chips.length ? esc(chips.join(" · ")) : T("nothingYet"));
-    html += " · " + ((d.backend && d.backend.indexOf("vlm") === 0) ? T("visionModel") : T("photoChecks"));
+    html += " · " + ((d.backend && d.backend.indexOf("pixel-checks") !== 0) ? T("visionModel") : T("photoChecks"));
     var bad = (d.photos || []).filter(function (p) { return p.issues && p.issues.length; }).length;
     if (bad) html += " · <b>" + esc(bad === 1 ? T("needRetake1") : TF("needRetake", { n: bad })) + "</b>";
     if (_filled.length) html += " · " + esc(TF("filledIn", { list: _filled.join(", ") }));

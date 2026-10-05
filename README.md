@@ -140,6 +140,7 @@ Sellers can upload product photos in the form. The details are filled in automat
 | Layer | Runs | Gives |
 |---|---|---|
 | Photo checks (Pillow + numpy) | Always, no model needed | Resolution, brightness, blur, main colour, photo count |
+| Doc-AI digitise | When `DOC_AI_API_KEY` is set | The text on the photos (fabric/GSM labels, size charts), used as a hint for the model |
 | Vision model | When `VISION_MODEL` and `VISION_API_KEY` are set | Sub-category, fabric, pattern, colour, size chart visible, fabric/GSM label visible, which shots exist, a suggested title |
 
 The vision model is called through an OpenAI-compatible `/chat/completions`
@@ -149,6 +150,18 @@ a self-hosted model. The model's answer is checked against the allowed values,
 and anything unexpected is dropped. If the call fails, the photo checks still
 answer. Photo problems (blurry, dark, small) slightly raise the predicted return
 rate, and each one becomes a Hinglish tip in the chat.
+
+### Doc-AI digitise step (`vyapar_ai/vision.py`)
+
+When `DOC_AI_API_KEY` is set, each photo is digitised by Sarvam's Doc-AI job API
+before the vision model sees it: the photo goes to `/doc-ai/v1/job/digitise`
+(with an `Idempotency-Key` so retries are safe), the job is polled at
+`/doc-ai/v1/job/{id}/status` until it reaches a terminal state, and the rendered
+HTML is fetched from the URL minted by `/doc-ai/v1/job/{id}/download-url`. The
+text Doc-AI reads (fabric/GSM labels, size charts, any printed matter) is passed
+to the vision model alongside the images as a hint, so the model gets both the
+OCR text and the picture. If the Doc-AI step fails, the model still runs on the
+images alone, and if that fails the pixel checks still answer.
 
 ![Photo upload filling the form](docs/images/photo-upload.png)
 
