@@ -84,6 +84,13 @@ def index():
     return FileResponse(WEB / "index.html", headers={"Cache-Control": "no-store"})
 
 
+@app.get("/i18n.json", include_in_schema=False)
+def i18n_catalogue():
+    """Translation catalogue (languages + strings) used by the web UI."""
+    return FileResponse(WEB / "i18n.json", media_type="application/json",
+                        headers={"Cache-Control": "no-store"})
+
+
 @app.get("/architecture", include_in_schema=False)
 def architecture():
     return FileResponse(DOCS / "architecture.html", headers={"Cache-Control": "no-store"})
