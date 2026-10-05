@@ -233,6 +233,14 @@ button { cursor: pointer; }
 .photo-crop .ph-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--subtle); }
 .photo-crop .ph-empty .icon { width: 26px; height: 26px; }
 .photo-crop .photo-count { position: absolute; right: 3px; bottom: 3px; padding: 1px 6px; border-radius: 99px; background: rgba(40,18,43,.74); color: #fff; font-size: 9px; font-weight: 700; }
+.photo-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 8px; margin: -6px 0 16px; }
+.photo-thumb { position: relative; margin: 0; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-thumb .cover-tag { position: absolute; top: 3px; left: 3px; padding: 1px 5px; border-radius: 4px; background: #fffffff0; color: var(--brand-dark); font-size: 9px; font-weight: 700; }
+.photo-thumb .rm { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: #28122bd9; color: #fff; font-size: 13px; line-height: 20px; cursor: pointer; }
+.photo-thumb .qbadge { position: absolute; inset: auto 0 0; padding: 2px 0; background: #218653e6; color: #fff; font-size: 9px; font-weight: 700; text-align: center; }
+.photo-thumb.bad .qbadge { background: #b66b12e6; }
+.photo-thumb.add { display: grid; place-items: center; border: 1.5px dashed var(--line-strong); color: var(--brand); font-size: 22px; font-weight: 300; cursor: pointer; background: #fdfbfd; }
 .quality-badge.warn { background: var(--amber-soft); color: var(--amber); }
 .detected { margin: -10px 0 16px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; background: #fdfbfd; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .detected b { color: var(--ink); }
@@ -306,6 +314,7 @@ button { cursor: pointer; }
               <button class="text-button" id="changePhotoBtn" type="button"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/></svg><span data-i18n="changePhoto">Add / change photo</span></button>
             </div>
           </div>
+          <div class="photo-strip" id="photoStrip" hidden></div>
           <div class="detected" id="detected" hidden></div>
 
           <div class="subheading"><h3 data-i18n="prodInfo">Product information</h3><span data-i18n="reviewEdit">Review and edit if needed</span></div>
@@ -414,6 +423,9 @@ button { cursor: pointer; }
       badgeNoPhoto: "Add a photo to auto-fill", badgeGood: "Photo looks good",
       badgeRetake1: "1 photo needs a retake", badgeRetakeN: "{n} photos need a retake",
       changePhoto: "Add / change photo", addPhotoAria: "Add or change product photos",
+      cover: "Cover", removePhoto: "Remove photo {n}", addMore: "Add more photos", goodShort: "Good",
+      issue_blurry: "Blurry", issue_too_dark: "Too dark", issue_overexposed: "Too bright", issue_low_resolution: "Low res",
+      photoCount: "{n} photos", photoCount1: "1 photo",
       prodInfo: "Product information", reviewEdit: "Review and edit if needed",
       fTitle: "Product title", fCategory: "Category", fColour: "Colour", fFabric: "Fabric", fPattern: "Pattern", fWeight: "Weight",
       costsTitle: "Your costs & profit", costsSub: "Enter cost for one product.",
@@ -467,6 +479,9 @@ button { cursor: pointer; }
       badgeNoPhoto: "ऑटो-भरने के लिए फ़ोटो डालें", badgeGood: "फ़ोटो ठीक है",
       badgeRetake1: "1 फ़ोटो दोबारा लेनी है", badgeRetakeN: "{n} फ़ोटो दोबारा लेनी हैं",
       changePhoto: "फ़ोटो जोड़ें / बदलें", addPhotoAria: "प्रोडक्ट की फ़ोटो जोड़ें या बदलें",
+      cover: "कवर", removePhoto: "फ़ोटो {n} हटाएँ", addMore: "और फ़ोटो जोड़ें", goodShort: "ठीक",
+      issue_blurry: "धुंधली", issue_too_dark: "बहुत अंधेरी", issue_overexposed: "ज़्यादा रोशनी", issue_low_resolution: "कम रेज़ोल्यूशन",
+      photoCount: "{n} फ़ोटो", photoCount1: "1 फ़ोटो",
       prodInfo: "प्रोडक्ट की जानकारी", reviewEdit: "देखें और ज़रूरत हो तो बदलें",
       fTitle: "प्रोडक्ट का नाम", fCategory: "श्रेणी", fColour: "रंग", fFabric: "कपड़ा", fPattern: "डिज़ाइन", fWeight: "वज़न",
       costsTitle: "आपकी लागत और मुनाफ़ा", costsSub: "एक प्रोडक्ट की लागत डालें।",
@@ -681,13 +696,57 @@ button { cursor: pointer; }
     var img = $("coverImg"), empty = $("phEmpty"), cnt = $("photoCount");
     if (photos.length) {
       var f = photos[0];
-      if (f._url) URL.revokeObjectURL(f._url);
-      f._url = URL.createObjectURL(f);
+      if (!f._url) f._url = URL.createObjectURL(f);
       img.src = f._url; img.hidden = false; empty.hidden = true;
-      cnt.hidden = false; cnt.textContent = photos.length + (photos.length > 1 ? " photos" : " photo");
+      cnt.hidden = false; cnt.textContent = photos.length > 1 ? TF("photoCount", { n: photos.length }) : T("photoCount1");
     } else {
       img.hidden = true; img.removeAttribute("src"); empty.hidden = false; cnt.hidden = true;
     }
+  }
+  function issueShort(issues) { return (issues && issues.length) ? T("issue_" + issues[0]) : null; }
+  function renderStrip() {
+    var strip = $("photoStrip");
+    strip.innerHTML = "";
+    if (!photos.length) { strip.hidden = true; return; }
+    strip.hidden = false;
+    photos.forEach(function (f, i) {
+      if (!f._url) f._url = URL.createObjectURL(f);
+      var fig = document.createElement("figure");
+      fig.className = "photo-thumb";
+      var img = document.createElement("img");
+      img.src = f._url; img.alt = "";
+      fig.appendChild(img);
+      if (i === 0) { var c = document.createElement("span"); c.className = "cover-tag"; c.textContent = T("cover"); fig.appendChild(c); }
+      var rm = document.createElement("button");
+      rm.type = "button"; rm.className = "rm"; rm.textContent = "×";
+      rm.setAttribute("aria-label", TF("removePhoto", { n: i + 1 }));
+      rm.addEventListener("click", function () { removePhoto(i); });
+      fig.appendChild(rm);
+      var p = report && report.photos ? report.photos[i] : null;
+      if (p) {
+        var badge = document.createElement("span"); badge.className = "qbadge";
+        var short = issueShort(p.issues);
+        if (short) { fig.classList.add("bad"); badge.textContent = short; }
+        else { badge.textContent = T("goodShort"); }
+        fig.appendChild(badge);
+      }
+      strip.appendChild(fig);
+    });
+    if (photos.length < 8) {
+      var add = document.createElement("button");
+      add.type = "button"; add.className = "photo-thumb add"; add.innerHTML = '<span aria-hidden="true">+</span>';
+      add.setAttribute("aria-label", T("addMore"));
+      add.addEventListener("click", function () { $("photos").click(); });
+      strip.appendChild(add);
+    }
+  }
+  function removePhoto(i) {
+    var f = photos[i];
+    if (f && f._url) URL.revokeObjectURL(f._url);
+    photos.splice(i, 1);
+    setCover(); renderStrip();
+    if (photos.length) { analyzePhotos(); }
+    else { report = null; updateQuality(); renderDetected(); }
   }
   function updateQuality() {
     var badge = $("qualityBadge"), txt = $("qualityText");
@@ -700,7 +759,7 @@ button { cursor: pointer; }
     if (ok.length < arr.length) toast(T("tOnlyImages"));
     ok.forEach(function (f) { if (!photos.some(function (g) { return g.name === f.name && g.size === f.size; })) photos.push(f); });
     if (photos.length > 8) { photos = photos.slice(0, 8); toast(T("tTooMany")); }
-    setCover(); analyzePhotos();
+    setCover(); renderStrip(); analyzePhotos();
   }
   function analyzePhotos() {
     if (!photos.length) { report = null; updateQuality(); renderDetected(); return; }
@@ -734,6 +793,7 @@ button { cursor: pointer; }
     _filled = filled;
     renderDetected();
     updateQuality();
+    renderStrip();
     $("productHint").textContent = T("productHint");
     updateTaskCount();
     if (hasPrice) runDay0(false, true);
@@ -763,7 +823,7 @@ button { cursor: pointer; }
     $("langCode").textContent = lang === "hi" ? "हिं" : "EN";
     document.documentElement.lang = lang === "hi" ? "hi" : "en";
     // refresh JS-rendered text
-    updateAttrs(); updateCostTotal(); updateQuality(); renderDetected(); updateTaskCount();
+    updateAttrs(); updateCostTotal(); updateQuality(); renderDetected(); renderStrip(); updateTaskCount();
     if (hasPrice && day0) { updateLeversCopy(day0); renderRecommendation(day0); }
     else { renderEmpty(); }
     updateWhatsApp();
