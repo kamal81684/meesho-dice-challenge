@@ -61,3 +61,16 @@ def test_risk_model_falls_back_when_lightgbm_cannot_load(monkeypatch, catalog):
     model.fit(catalog)
     ret, rto = model.predict(RiskFeatures("kurti", "women_ethnic"))
     assert 0.05 < ret < 0.5 and 0.05 < rto < 0.5
+
+
+def test_search_survives_non_finite_matrix():
+    import numpy as np
+    idx = SimilarityIndex(generate_catalog(300, seed=3))
+    # A broken embedding must not leak NaN/inf similarities into the ranking.
+    idx.matrix[0, 0] = np.nan
+    idx.matrix[1, 0] = np.inf
+    q = idx.embedder.embed("pink printed cotton kurti", "cotton", "printed", "pink")
+    hits = idx.search(q, k=5)
+    assert hits
+    assert all(np.isfinite(sim) for _, sim in hits)
+    assert all(i not in (0, 1) for i, _ in hits)

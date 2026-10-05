@@ -76,7 +76,15 @@ class SimilarityIndex:
 
     def search(self, query: np.ndarray, mask: Optional[np.ndarray] = None,
                k: int = 20) -> list[tuple[int, float]]:
-        sims = self.matrix @ query
+        # Every row is a unit vector, so this dot product is bounded by 1 and
+        # cannot really overflow or divide by zero. Some BLAS backends (notably
+        # Apple's Accelerate on macOS) still raise spurious floating-point flags
+        # for a float32 matmul, which numpy reports as RuntimeWarnings - silence
+        # them for this one call and drop any non-finite result defensively.
+        with np.errstate(divide="ignore", over="ignore", invalid="ignore"):
+            sims = self.matrix @ query
+        if not np.isfinite(sims).all():
+            sims = np.nan_to_num(sims, nan=-np.inf, posinf=-np.inf, neginf=-np.inf)
         if mask is not None:
             sims = np.where(mask, sims, -np.inf)
         k = min(k, int(np.isfinite(sims).sum()))
