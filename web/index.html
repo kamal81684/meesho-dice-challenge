@@ -3,683 +3,650 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vyapar-AI Pricing</title>
+<title>Vyapar-AI · Smart Pricing Assistant</title>
 <style>
-  :root { --plum:#5b1a5e; --pink:#e5246b; --green:#1f9d55; --amber:#d97706; --red:#e11d48; --bg:#fbf6fb;
-          --card:#fff; --muted:#6b5b6e; --line:#ecdfee; --chat:#e9f5ec; --mine:#d9fdd3; }
-  * { box-sizing: border-box; }
-  [hidden] { display:none !important; }
-  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:#2a1630; }
-  header { background:linear-gradient(90deg,var(--plum),var(--pink)); color:#fff; padding:14px 16px; }
-  header h1 { margin:0; font-size:20px; } header p { margin:2px 0 0; opacity:.85; font-size:13px; }
-  main { max-width:800px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; min-width:0; }
-  h2 { font-size:15px; margin:0 0 12px; color:var(--plum); }
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
-  /* Accordion */
-  .acc { padding:0; overflow:hidden; }
-  .acc-head { display:flex; align-items:center; gap:10px; width:100%; margin:0; padding:14px 16px;
-              border:0; background:none; font:inherit; text-align:left; cursor:pointer; color:var(--plum); }
-  .acc-head:hover { background:#fdf7fe; }
-  .step { flex:0 0 auto; width:24px; height:24px; border-radius:50%; background:var(--plum); color:#fff;
-          font-size:13px; font-weight:700; display:grid; place-items:center; }
-  .acc-title { font-size:15px; font-weight:600; }
-  .acc-summary { margin-left:auto; font-size:12px; color:var(--muted); text-align:right; max-width:44%;
-                 overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .chev { flex:0 0 auto; width:16px; height:16px; color:var(--muted); transition:transform .25s ease; }
-  .acc.open .chev { transform:rotate(180deg); }
-  .acc-body { display:grid; grid-template-rows:0fr; transition:grid-template-rows .28s ease; }
-  .acc.open .acc-body { grid-template-rows:1fr; }
-  .acc-inner { overflow:hidden; min-height:0; }
-  .acc-pad { padding:2px 16px 16px; }
-  label { display:block; font-size:12px; color:var(--muted); margin:8px 0 3px; }
-  input, select { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; }
-  .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .checks label { display:flex; gap:6px; align-items:center; color:#2a1630; font-size:13px; }
-  .checks input { width:auto; }
-  #go { margin-top:14px; width:100%; padding:11px; border:0; border-radius:8px; background:var(--pink);
-        color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
-  button:disabled { opacity:.6; cursor:default; }
-  button:focus-visible, input:focus-visible { outline:2px solid var(--pink); outline-offset:2px; }
-  .big { font-size:44px; font-weight:800; color:var(--plum); text-align:center; margin:4px 0; font-variant-numeric:tabular-nums; }
-  .sub { text-align:center; color:var(--muted); font-size:13px; }
-  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px; }
-  .stat { border:1px solid var(--line); border-radius:10px; padding:10px; text-align:center; }
-  .stat b { display:block; font-size:20px; color:var(--plum); } .stat span { font-size:11px; color:var(--muted); }
-  .listed { margin-top:12px; background:#ecfdf3; border:1px solid #bbf7d0; color:#166534; border-radius:8px; padding:8px 10px; font-size:13px; }
+:root {
+  --ink: #28122b;
+  --muted: #716675;
+  --subtle: #978d99;
+  --brand: #9f1f63;
+  --brand-dark: #68145d;
+  --brand-soft: #fff1f6;
+  --brand-pale: #f8eef7;
+  --page: #fbf8fc;
+  --card: #ffffff;
+  --line: #e9e1e9;
+  --line-strong: #d9cdda;
+  --green: #218653;
+  --green-soft: #eaf8ef;
+  --amber: #b66b12;
+  --amber-soft: #fff6df;
+  --whatsapp: #207e4d;
+  --shadow: 0 10px 30px rgba(68, 22, 63, 0.06);
+}
 
-  /* Price slider */
-  .slider { margin-top:18px; border:1px solid var(--line); border-radius:12px; padding:14px; }
-  .slider-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; }
-  .slider-head h3 { margin:0; font-size:14px; color:var(--plum); }
-  .slider-head .hint { font-size:12px; color:var(--muted); }
-  .rangewrap { position:relative; margin:22px 2px 6px; }
-  input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:12px; border-radius:6px; padding:0; border:0;
-                      background:var(--track, #ddd); cursor:pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%;
-      background:var(--plum); border:3px solid #fff; box-shadow:0 1px 4px #0005; }
-  input[type=range]::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:var(--plum);
-      border:3px solid #fff; box-shadow:0 1px 4px #0005; }
-  .marks { position:relative; height:44px; font-size:11px; }
-  .mark { position:absolute; top:0; transform:translateX(-50%); text-align:center; white-space:nowrap; }
-  .mark::before { content:""; display:block; width:1px; height:6px; background:var(--muted); margin:0 auto 2px; }
-  .mark b { display:block; font-size:12px; font-variant-numeric:tabular-nums; }
-  .mark.edge-l { transform:none; text-align:left; } .mark.edge-l::before { margin-left:0; }
-  .mark.edge-r { transform:translateX(-100%); text-align:right; } .mark.edge-r::before { margin-right:0; }
-  .readout { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:8px; }
-  .readout .p { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--plum); }
-  .readout .m { font-size:14px; font-variant-numeric:tabular-nums; }
-  .chip { font-size:12px; font-weight:600; padding:4px 8px; border-radius:999px; }
-  .v-loss { background:#ffe4e6; color:#9f1239; } .v-below_target { background:#fef3c7; color:#92400e; }
-  .v-ok { background:#dcfce7; color:#166534; } .v-overpriced { background:#fef3c7; color:#92400e; }
-  .slider-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .btn { font:inherit; font-size:13px; font-weight:600; padding:8px 12px; border-radius:8px; cursor:pointer;
-         border:1px solid var(--line); background:#fff; color:var(--plum); }
-  .btn.primary { background:var(--green); border-color:var(--green); color:#fff; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; background: var(--page); color: var(--ink); font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; }
+button, a, label, summary { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+.icon { flex: 0 0 auto; }
 
-  table { width:100%; border-collapse:collapse; font-size:13px; } td { padding:4px 0; border-bottom:1px dashed var(--line); }
-  td:last-child { text-align:right; font-variant-numeric:tabular-nums; }
-  .warn { background:#fff1f2; color:#9f1239; border-radius:8px; padding:8px; font-size:13px; margin-top:10px; }
+.topbar { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(255,255,255,.16); background: linear-gradient(105deg, #5a145c, #a91d65 62%, #d22f66); color: white; }
+.topbar::before { content: ""; display: block; height: 3px; background: #f0cf58; }
+.topbar-inner { width: min(1220px, calc(100% - 40px)); height: 66px; margin: auto; display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; color: white; font-size: 21px; font-weight: 800; letter-spacing: -.04em; text-decoration: none; }
+.brand > span:last-child span { color: #ffd2e3; }
+.brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: rgba(255,255,255,.16); }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.language, .help-button { min-height: 36px; padding: 0 11px; display: flex; align-items: center; gap: 6px; border: 0; border-radius: 9px; background: rgba(255,255,255,.11); color: white; font-size: 13px; font-weight: 600; }
+.avatar { width: 36px; height: 36px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.55); border-radius: 50%; background: #f7d391; color: #5c2246; font-weight: 800; }
 
-  /* Chat */
-  .chat { background:var(--chat); border-radius:12px; padding:10px; min-height:200px; max-height:720px; overflow-y:auto;
-          display:flex; flex-direction:column; gap:10px; }
-  .bubble { background:#fff; border-radius:10px; padding:10px; font-size:14px; line-height:1.45; box-shadow:0 1px 1px #0001;
-            max-width:92%; align-self:flex-start; overflow-wrap:anywhere; }
-  .bubble.mine { background:var(--mine); align-self:flex-end; }
-  .bubble.faded { opacity:.55; }
-  .acts { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-  .acts button { font:inherit; font-size:12px; font-weight:600; padding:6px 9px; border-radius:6px; cursor:pointer;
-                 background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
-  .acts button:first-child { background:var(--green); color:#fff; border-color:var(--green); }
-  .acts button.chosen { outline:2px solid var(--plum); }
-  .ask { display:flex; gap:6px; margin-top:8px; }
-  .ask input { flex:1; min-width:0; }
-  .muted { color:var(--muted); font-size:13px; }
+.page { width: min(1220px, calc(100% - 40px)); margin: 0 auto; padding: 42px 0 80px; }
+.welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; margin-bottom: 30px; }
+.kicker { margin-bottom: 10px; display: flex; align-items: center; gap: 7px; color: var(--brand); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.welcome h1 { margin: 0; font-size: clamp(28px, 3.2vw, 42px); line-height: 1.12; letter-spacing: -.045em; }
+.welcome p { margin: 10px 0 0; color: var(--muted); font-size: 16px; line-height: 1.55; }
+.trust-note { min-width: 295px; padding: 13px 15px; display: flex; align-items: center; gap: 11px; border: 1px solid #cde9d6; border-radius: 12px; background: var(--green-soft); }
+.trust-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--green); color: white; }
+.trust-note > span:last-child { display: grid; gap: 2px; }
+.trust-note strong { font-size: 13px; }
+.trust-note small { color: #53705c; font-size: 11px; }
 
-  /* Photo upload */
-  .vh { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
-  .field-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin:8px 0 4px; }
-  .field-head .flabel { font-size:12px; color:var(--muted); }
-  .field-head .hint { font-size:11px; color:var(--muted); }
-  .dropzone { border:1.5px dashed #d9c3dc; border-radius:12px; background:#fdf9fd; padding:10px; transition:border-color .15s, background .15s; }
-  .dropzone.over { border-color:var(--pink); background:#fde9f0; }
-  .dz-empty { display:grid; justify-items:center; gap:4px; text-align:center; padding:14px 8px; cursor:pointer; margin:0; color:var(--plum); }
-  .dz-empty svg { width:30px; height:30px; color:var(--pink); }
-  .dz-empty b { font-size:14px; }
-  .dz-empty span { font-size:12px; color:var(--muted); }
-  .dz-empty .shotlist { font-size:11px; letter-spacing:.02em; }
-  .dz-empty:focus-within, .add-tile:focus-within { outline:2px solid var(--pink); outline-offset:2px; border-radius:8px; }
-  .thumbs { display:grid; grid-template-columns:repeat(auto-fill, minmax(72px, 1fr)); gap:8px; }
-  .thumbs:empty { display:none; }
-  .thumb { margin:0; position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--line); background:#fff; }
-  .thumb img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
-  .thumb .cover { position:absolute; top:4px; left:4px; font-size:10px; font-weight:700; background:#fffffff0; color:var(--plum); padding:1px 5px; border-radius:4px; }
-  .thumb .rm { position:absolute; top:3px; right:3px; width:22px; height:22px; border-radius:50%; border:0; cursor:pointer;
-               background:#2a1630cc; color:#fff; font-size:14px; line-height:22px; padding:0; }
-  .thumb .badge { position:absolute; left:0; right:0; bottom:0; font-size:10px; font-weight:700; text-align:center; padding:2px 0;
-                  background:#e11d48e6; color:#fff; }
-  .thumb.ok .badge { background:#1f9d55e6; }
-  .add-tile { display:grid; place-items:center; aspect-ratio:1; border:1.5px dashed #d9c3dc; border-radius:8px; cursor:pointer;
-              color:var(--pink); font-size:26px; font-weight:300; margin:0; background:#fff; }
-  .photo-status { margin-top:8px; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:13px; line-height:1.45; display:grid; gap:8px; }
-  .ps-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
-  .ps-head b { color:var(--plum); }
-  .src { font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; background:#eee8ef; color:var(--muted); }
-  .src.vlm { background:#dcfce7; color:#166534; }
-  .chips { display:flex; flex-wrap:wrap; gap:6px; }
-  .chip2 { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 9px; border-radius:999px; background:#f4e8f5; color:var(--plum); }
-  .swatch { width:12px; height:12px; border-radius:50%; border:1px solid #0002; }
-  .ps-warn { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:8px; padding:7px 9px; font-size:12.5px; }
-  .ps-note { font-size:12px; color:var(--muted); }
-  .spinner { width:14px; height:14px; border:2px solid #e9d5ea; border-top-color:var(--pink); border-radius:50%; display:inline-block;
-             vertical-align:-2px; margin-right:6px; animation:spin .8s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .auto { font-size:10px; font-weight:700; color:#166534; background:#dcfce7; border-radius:4px; padding:1px 5px; margin-left:6px; }
-  .filled { animation: flash 1.6s ease-out; }
-  @keyframes flash { from { background:#fef3c7; } to { background:#fff; } }
-  @media (prefers-reduced-motion: reduce) {
-    .filled, .spinner { animation:none; }
-    .acc-body, .chev { transition:none; }
-  }
+.steps { max-width: 880px; margin-bottom: 26px; display: grid; grid-template-columns: auto 1fr auto 1fr auto; align-items: center; }
+.step { display: flex; align-items: center; gap: 10px; color: var(--subtle); }
+.step > span { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--card); font-size: 12px; font-weight: 700; }
+.step > div { display: grid; gap: 1px; }
+.step strong { color: inherit; font-size: 12px; white-space: nowrap; }
+.step small { font-size: 10px; }
+.step.active > span { border-color: var(--green); background: var(--green); color: white; font-size: 0; }
+.step.active > span::after { content: "✓"; font-size: 13px; }
+.step.active strong, .step.current strong { color: var(--ink); }
+.step.current > span { border-color: var(--brand); background: var(--brand); color: white; }
+.step-line { height: 1px; margin: 0 14px; background: var(--line); }
+
+.workspace { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(390px, .92fr); align-items: start; gap: 24px; }
+.form-column, .results-column { display: grid; gap: 18px; }
+.results-column { position: sticky; top: 92px; }
+.card, .recommendation, .whatsapp-card { border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+.card { padding: 22px; }
+.card-title, .improve-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.card-title > div, .improve-heading > div { display: flex; align-items: flex-start; gap: 12px; }
+.section-number { width: 30px; height: 30px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 9px; background: var(--brand-pale); color: var(--brand-dark); font-size: 13px; font-weight: 800; }
+.card-title h2, .improve-heading h2 { margin: 1px 0 3px; font-size: 17px; letter-spacing: -.02em; }
+.card-title p, .improve-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+.saved { padding: 5px 8px; display: flex; align-items: center; gap: 4px; border-radius: 99px; background: var(--green-soft); color: var(--green); font-size: 11px; font-weight: 700; }
+
+.product-summary { margin: 20px 0 22px; padding: 13px; display: flex; align-items: center; gap: 14px; border: 1px solid var(--line); border-radius: 13px; background: #fdfbfd; }
+.photo-crop { position: relative; width: 78px; height: 88px; flex: 0 0 auto; overflow: hidden; border-radius: 9px; background: #efe6ed; }
+.photo-crop img { position: absolute; width: 1544px; max-width: none; transform: translate(-406px, -191px); }
+.product-meta { min-width: 0; display: grid; justify-items: start; gap: 3px; }
+.quality-badge { margin-bottom: 2px; padding: 3px 7px; display: inline-flex; align-items: center; gap: 3px; border-radius: 99px; background: var(--green-soft); color: var(--green); font-size: 10px; font-weight: 700; }
+.product-meta h3 { max-width: 100%; margin: 0; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.product-meta p { margin: 0; color: var(--muted); font-size: 12px; }
+.text-button { margin-top: 4px; padding: 0; display: flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--brand); font-size: 11px; font-weight: 700; }
+.subheading { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.subheading h3 { margin: 0; font-size: 13px; }
+.subheading span { color: var(--subtle); font-size: 11px; }
+.field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 12px; }
+.field.wide { grid-column: 1 / -1; }
+.field { min-width: 0; display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.input-wrap, .select-wrap { position: relative; display: block; }
+.field input, .field select { width: 100%; height: 42px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 9px; outline: none; background: white; color: var(--ink); font-size: 13px; font-weight: 500; transition: .15s ease; }
+.field input:focus, .field select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+.field select { appearance: none; padding-right: 38px; }
+.select-wrap .icon { position: absolute; top: 13px; right: 12px; pointer-events: none; color: var(--muted); }
+.input-wrap b { position: absolute; top: 12px; right: 12px; color: var(--muted); font-size: 12px; }
+.input-wrap:has(b) input { padding-right: 32px; }
+.card-title.compact { margin-bottom: 16px; }
+.cost-callout { margin-bottom: 16px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 8px; border-radius: 9px; background: var(--brand-pale); color: #644661; font-size: 11px; line-height: 1.45; }
+.cost-callout .icon { margin-top: 1px; color: var(--brand); }
+.cost-total { margin: 18px 0; padding: 14px 0; display: flex; align-items: center; justify-content: space-between; border-block: 1px solid var(--line); }
+.cost-total span { color: var(--muted); font-size: 12px; }
+.cost-total strong { font-size: 18px; }
+.primary-button, .list-button { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 10px; background: linear-gradient(100deg, var(--brand-dark), var(--brand)); color: white; font-size: 13px; font-weight: 700; box-shadow: 0 7px 18px rgba(139, 28, 91, .18); }
+.primary-button:hover, .list-button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.primary-button:disabled { cursor: wait; opacity: .8; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.safe-note { margin: 10px 0 0; display: flex; align-items: center; justify-content: center; gap: 5px; color: var(--green); font-size: 10px; }
+
+.recommendation { overflow: hidden; border-color: #dbc9d8; box-shadow: 0 16px 40px rgba(83, 25, 74, .1); }
+.result-top { padding: 20px 22px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.result-label { display: flex; align-items: center; gap: 7px; color: var(--brand-dark); font-size: 12px; font-weight: 800; letter-spacing: .02em; }
+.confidence { padding: 5px 8px; border-radius: 99px; background: var(--green-soft); color: var(--green); font-size: 10px; font-weight: 700; }
+.price-row { padding: 8px 22px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.price-row > div { display: flex; align-items: flex-start; }
+.rupee { margin-top: 10px; font-size: 24px; font-weight: 700; }
+.price-row strong { font-size: 52px; line-height: 1; letter-spacing: -.06em; }
+.profit-pill { padding: 7px 9px; border-radius: 7px; background: var(--green-soft); color: var(--green); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.price-explainer { margin: 7px 22px 18px; color: var(--muted); font-size: 12px; }
+.market-summary { display: grid; grid-template-columns: 1fr 1fr; border-block: 1px solid var(--line); background: #fdfbfd; }
+.market-summary > div { padding: 13px 22px; display: grid; gap: 3px; }
+.market-summary > div + div { border-left: 1px solid var(--line); }
+.market-summary span { color: var(--muted); font-size: 10px; }
+.market-summary strong { font-size: 13px; }
+.positive { color: var(--green) !important; }
+.price-control { margin: 18px 22px; padding: 15px; border: 1px solid var(--line); border-radius: 12px; }
+.control-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.control-head h3 { margin: 0 0 2px; font-size: 12px; }
+.control-head p { margin: 0; color: var(--muted); font-size: 10px; }
+.control-head output { padding: 6px 9px; border-radius: 7px; background: var(--brand-pale); color: var(--brand-dark); font-size: 13px; font-weight: 800; }
+.range { --range-position: 64%; width: 100%; height: 5px; margin: 19px 0 8px; appearance: none; border-radius: 99px; outline: none; background: linear-gradient(to right, #ce4052 0 45%, #d8952a 45% 60%, #39a067 60% 100%); }
+.range::-webkit-slider-thumb { width: 19px; height: 19px; appearance: none; border: 3px solid white; border-radius: 50%; background: var(--brand-dark); box-shadow: 0 1px 4px rgba(0,0,0,.28); cursor: grab; }
+.range::-moz-range-thumb { width: 14px; height: 14px; border: 3px solid white; border-radius: 50%; background: var(--brand-dark); box-shadow: 0 1px 4px rgba(0,0,0,.28); cursor: grab; }
+.range-labels { display: flex; justify-content: space-between; color: var(--subtle); font-size: 8px; }
+.range-labels span { display: grid; gap: 1px; }
+.range-labels span:nth-child(2) { text-align: center; }
+.range-labels span:last-child { text-align: right; }
+.range-labels b { color: var(--muted); font-size: 9px; }
+.price-status { margin-top: 12px; padding: 7px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 7px; background: var(--green-soft); color: var(--green); font-size: 10px; font-weight: 700; }
+.price-status.warning { background: var(--amber-soft); color: var(--amber); }
+.breakdown { border-top: 1px solid var(--line); }
+.breakdown summary { padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; list-style: none; cursor: pointer; font-size: 11px; font-weight: 700; }
+.breakdown summary::-webkit-details-marker { display: none; }
+.breakdown summary > span:last-child { display: flex; align-items: center; gap: 3px; color: var(--brand); font-size: 10px; }
+.breakdown[open] summary .icon { transform: rotate(180deg); }
+.breakdown-grid { padding: 0 22px 15px; display: grid; grid-template-columns: 1fr auto; gap: 7px; color: var(--muted); font-size: 11px; }
+.breakdown-grid b { color: var(--ink); text-align: right; }
+.list-button { width: calc(100% - 44px); margin: 4px 22px 9px; }
+.secondary-button { width: calc(100% - 44px); min-height: 39px; margin: 0 22px 18px; border: 0; background: transparent; color: var(--brand); font-size: 11px; font-weight: 700; }
+
+.improve-card { padding: 18px; box-shadow: none; }
+.improve-heading { margin-bottom: 12px; }
+.task-count { padding: 5px 8px; border-radius: 99px; background: var(--brand-pale); color: var(--brand-dark); font-size: 10px; font-weight: 700; white-space: nowrap; }
+.action-item { position: relative; padding: 12px 0; display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 9px; cursor: pointer; }
+.action-item + .action-item { border-top: 1px solid var(--line); }
+.action-item input { position: absolute; opacity: 0; pointer-events: none; }
+.custom-check { width: 21px; height: 21px; display: grid; place-items: center; border: 1.5px solid var(--line-strong); border-radius: 6px; color: transparent; }
+.action-item.completed .custom-check { border-color: var(--green); background: var(--green); color: white; }
+.action-copy { min-width: 0; display: grid; gap: 2px; }
+.action-copy strong { font-size: 11px; }
+.action-copy small { color: var(--muted); font-size: 9px; }
+.action-item.completed .action-copy strong { color: var(--green); text-decoration: line-through; text-decoration-color: #9fc9ae; }
+.impact { padding: 5px 7px; border-radius: 6px; background: var(--amber-soft); color: var(--amber); font-size: 9px; font-weight: 700; white-space: nowrap; }
+.completed .impact { background: var(--green-soft); color: var(--green); }
+.whatsapp-card { padding: 15px; box-shadow: none; background: #f1f8f4; border-color: #d6eadf; }
+.whatsapp-head { display: flex; align-items: center; justify-content: space-between; color: var(--whatsapp); font-size: 11px; font-weight: 800; }
+.whatsapp-head span { display: flex; align-items: center; gap: 6px; }
+.whatsapp-head b { color: #739581; font-size: 9px; text-transform: uppercase; }
+.message { width: 88%; margin: 11px 0 8px auto; padding: 10px 11px; display: grid; gap: 3px; border-radius: 10px 10px 2px 10px; background: #dcf8e5; color: #355a42; font-size: 10px; line-height: 1.45; box-shadow: 0 1px 2px rgba(25,73,43,.08); }
+.message small { display: flex; justify-content: flex-end; align-items: center; color: #739581; font-size: 8px; }
+.whatsapp-card > p { margin: 0; color: #688073; font-size: 9px; }
+.mobile-action { display: none; }
+
+@media (max-width: 980px) {
+  .workspace { grid-template-columns: 1fr; }
+  .results-column { position: static; grid-row: 1; }
+  .form-column { grid-row: 2; }
+  .welcome { align-items: flex-start; }
+}
+@media (max-width: 680px) {
+  .topbar-inner, .page { width: min(100% - 28px, 1220px); }
+  .topbar-inner { height: 58px; }
+  .help-button { display: none; }
+  .brand { font-size: 18px; }
+  .brand-mark { width: 31px; height: 31px; }
+  .page { padding: 28px 0 100px; }
+  .welcome { display: block; margin-bottom: 22px; }
+  .welcome h1 { font-size: 30px; }
+  .welcome p { font-size: 14px; }
+  .trust-note { min-width: 0; margin-top: 17px; }
+  .steps { grid-template-columns: auto 1fr auto 1fr auto; }
+  .step > div { display: none; }
+  .step-line { margin: 0 8px; }
+  .workspace { gap: 14px; }
+  .card { padding: 17px; border-radius: 14px; }
+  .results-column { gap: 14px; }
+  .field-grid { grid-template-columns: 1fr; }
+  .field.wide { grid-column: auto; }
+  .product-summary { align-items: flex-start; }
+  .subheading span { display: none; }
+  .price-row { align-items: flex-end; }
+  .price-row strong { font-size: 46px; }
+  .profit-pill { margin-bottom: 3px; font-size: 9px; }
+  .market-summary > div, .result-top, .price-row { padding-inline: 17px; }
+  .price-explainer { margin-inline: 17px; }
+  .price-control { margin-inline: 17px; }
+  .breakdown summary { padding-inline: 17px; }
+  .list-button, .secondary-button { width: calc(100% - 34px); margin-inline: 17px; }
+  .mobile-action { position: fixed; z-index: 30; inset: auto 0 0; padding: 10px 14px max(10px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid var(--line); background: rgba(255,255,255,.96); box-shadow: 0 -8px 24px rgba(47,18,42,.09); backdrop-filter: blur(10px); }
+  .mobile-action > div { display: grid; }
+  .mobile-action span { color: var(--muted); font-size: 9px; }
+  .mobile-action strong { font-size: 18px; }
+  .mobile-action button { min-height: 43px; padding: 0 18px; display: flex; align-items: center; gap: 6px; border: 0; border-radius: 9px; background: var(--brand); color: white; font-size: 12px; font-weight: 700; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+
+
+/* ---- app additions (photo upload, detected box, toast, etc.) ---- */
+.photo-crop { cursor: pointer; border: 1.5px dashed transparent; }
+.photo-crop:hover, .photo-crop:focus-visible { border-color: var(--brand); outline: none; }
+.photo-crop.dragover { border-color: var(--brand); background: var(--brand-soft); }
+.photo-crop img { position: static; width: 100%; height: 100%; max-width: none; transform: none; object-fit: cover; display: block; }
+.photo-crop .ph-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--subtle); }
+.photo-crop .ph-empty .icon { width: 26px; height: 26px; }
+.photo-crop .photo-count { position: absolute; right: 3px; bottom: 3px; padding: 1px 6px; border-radius: 99px; background: rgba(40,18,43,.74); color: #fff; font-size: 9px; font-weight: 700; }
+.quality-badge.warn { background: var(--amber-soft); color: var(--amber); }
+.detected { margin: -10px 0 16px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; background: #fdfbfd; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.detected b { color: var(--ink); }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; max-width: min(92vw, 540px); padding: 11px 15px; border-radius: 11px; background: #28122b; color: #fff; font-size: 13px; line-height: 1.45; box-shadow: 0 10px 30px rgba(0,0,0,.28); opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(-3px); }
+@media (max-width: 680px) { .toast { bottom: 88px; } }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 </style>
 </head>
 <body>
-<header>
-  <h1>Vyapar-AI · Smart Pricing Assistant</h1>
-  <p>Turn your product into profit with data-driven pricing</p>
-</header>
-<main>
-  <section class="card acc open" id="sec1">
-    <button class="acc-head" id="accBtn1" type="button" aria-expanded="true" aria-controls="accBody1">
-      <span class="step" aria-hidden="true">1</span>
-      <span class="acc-title">Product details &amp; costs</span>
-      <span class="acc-summary" id="sum1"></span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
-    <div class="acc-body" id="accBody1" role="region" aria-labelledby="accBtn1">
-      <div class="acc-inner">
-        <div class="acc-pad">
-    <form id="f">
-      <div class="field-head"><span class="flabel" id="photosLabel">Product photos</span><span class="hint">optional · fills in the details for you</span></div>
-      <div class="dropzone" id="dropzone">
-        <input id="photos" class="vh" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-labelledby="photosLabel">
-        <label for="photos" class="dz-empty" id="dzEmpty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
-          <b>Add product photos</b>
-          <span>Drag &amp; drop or tap to choose · JPEG, PNG or WebP · up to 8</span>
-          <span class="shotlist">Front · Back · Close-up · Worn · Size chart</span>
-        </label>
-        <div class="thumbs" id="thumbs"></div>
-      </div>
-      <div id="photoStatus" class="photo-status" aria-live="polite" hidden></div>
-      <input type="hidden" id="photo_issues" name="photo_issues" value="0">
-      <label for="title">Product title</label>
-      <input id="title" name="title" value="Pink printed cotton kurti" required>
-      <label for="sub">Sub-category</label>
-      <select name="subcategory" id="sub"></select>
-      <div class="row">
-        <div><label for="fabric">Fabric</label><select id="fabric" name="fabric">
-          <option>cotton</option><option>rayon</option><option>silk</option><option>polyester</option><option>georgette</option><option>linen</option></select></div>
-        <div><label for="pattern">Pattern</label><select id="pattern" name="pattern">
-          <option>printed</option><option>solid</option><option>embroidered</option><option>woven</option><option>striped</option><option>floral</option></select></div>
-      </div>
-      <div class="row">
-        <div><label for="color">Colour</label><select id="color" name="color">
-          <option>pink</option><option>red</option><option>blue</option><option>green</option><option>yellow</option><option>black</option><option>white</option><option>purple</option><option>orange</option></select></div>
-        <div><label for="weight_kg">Weight (kg)</label><input id="weight_kg" name="weight_kg" type="number" step="0.01" value="0.35"></div>
-      </div>
-      <div class="row">
-        <div><label for="cogs">Fabric / product cost (₹)</label><input id="cogs" name="cogs" type="number" value="150" required></div>
-        <div><label for="labor">Labour & stitching (₹)</label><input id="labor" name="labor" type="number" value="20"></div>
-      </div>
-      <div class="row">
-        <div><label for="packaging">Packaging (₹)</label><input id="packaging" name="packaging" type="number" value="10"></div>
-        <div><label for="target_profit">Target net profit (₹)</label><input id="target_profit" name="target_profit" type="number" value="40"></div>
-      </div>
-      <label for="seller_name">Your name</label>
-      <input id="seller_name" name="seller_name" value="Ramesh">
-      <input type="hidden" id="image_count" name="image_count" value="3">
-      <div class="checks">
-        <label><input type="checkbox" id="has_size_chart" name="has_size_chart"> Size chart added</label>
-        <label><input type="checkbox" id="has_fabric_card" name="has_fabric_card"> Fabric/GSM card added</label>
-      </div>
-      <button id="go" type="submit">Get launch price</button>
-    </form>
-        </div>
+<input id="photos" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple tabindex="-1" aria-hidden="true">
+
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#" aria-label="Vyapar-AI home">
+        <span class="brand-mark"><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17 10 11l4 4 6-8"/><path d="M15 7h5v5"/></svg></span>
+        <span>Vyapar<span>-AI</span></span>
+      </a>
+      <div class="header-actions">
+        <button class="language" id="langBtn" type="button" aria-label="Switch language">EN<svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></button>
+        <button class="help-button" type="button"><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 0 1 4.6 1c0 2-2.4 2.2-2.4 4"/><path d="M12 18h.01"/></svg>Help</button>
+        <div class="avatar" aria-label="Ramesh account">R</div>
       </div>
     </div>
-  </section>
+  </header>
 
-  <section class="card acc" id="sec2">
-    <button class="acc-head" id="accBtn2" type="button" aria-expanded="false" aria-controls="accBody2">
-      <span class="step" aria-hidden="true">2</span>
-      <span class="acc-title">Recommended listing price</span>
-      <span class="acc-summary" id="sum2"></span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
-    <div class="acc-body" id="accBody2" role="region" aria-labelledby="accBtn2">
-      <div class="acc-inner">
-        <div class="acc-pad">
-          <div id="result">
-            <p class="muted">Fill in the form and press <b>Get launch price</b>.</p>
+  <main class="page">
+    <section class="welcome">
+      <div>
+        <span class="kicker"><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/></svg>Smart pricing for your business</span>
+        <h1>Price your product with confidence</h1>
+        <p>Add your product cost. We&apos;ll suggest a profitable price and help reduce returns.</p>
+      </div>
+      <div class="trust-note"><span class="trust-icon"><svg aria-hidden="true" class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span><strong>No hidden commission</strong><small>Your price always covers your costs</small></span></div>
+    </section>
+
+    <nav class="steps" aria-label="Pricing steps">
+      <div class="step active"><span>1</span><div><strong>Product details</strong><small>About 2 minutes</small></div></div>
+      <div class="step-line"></div>
+      <div class="step current"><span>2</span><div><strong>Your best price</strong><small id="step2sub">Ready to review</small></div></div>
+      <div class="step-line"></div>
+      <div class="step"><span>3</span><div><strong>Improve sales</strong><small>Simple next steps</small></div></div>
+    </nav>
+
+    <div class="workspace">
+      <div class="form-column">
+        <section class="card product-card">
+          <div class="card-title">
+            <div><span class="section-number">1</span><div><h2>Your product</h2><p id="productHint">We filled in what we could from your photo.</p></div></div>
+            <span class="saved"><svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>Saved</span>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="card acc" id="sec3">
-    <button class="acc-head" id="accBtn3" type="button" aria-expanded="false" aria-controls="accBody3">
-      <span class="step" aria-hidden="true">3</span>
-      <span class="acc-title">WhatsApp nudges</span>
-      <span class="acc-summary" id="sum3"></span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
-    <div class="acc-body" id="accBody3" role="region" aria-labelledby="accBtn3">
-      <div class="acc-inner">
-        <div class="acc-pad">
-          <div class="chat" id="chat" aria-live="polite"><p class="muted">Vyapar-AI Bot messages will appear here.</p></div>
-        </div>
+          <div class="product-summary">
+            <div class="photo-crop" id="photoCrop" role="button" tabindex="0" aria-label="Add or change product photos">
+              <img id="coverImg" alt="" hidden>
+              <span class="ph-empty" id="phEmpty"><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/></svg></span>
+              <span class="photo-count" id="photoCount" hidden></span>
+            </div>
+            <div class="product-meta">
+              <span class="quality-badge" id="qualityBadge"><svg aria-hidden="true" class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>Add a photo to auto-fill</span>
+              <h3 id="pmTitle">Pink printed cotton kurti</h3>
+              <p id="pmAttrs">Kurti · Cotton · Printed</p>
+              <button class="text-button" id="changePhotoBtn" type="button"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/></svg>Add / change photo</button>
+            </div>
+          </div>
+          <div class="detected" id="detected" hidden></div>
+
+          <div class="subheading"><h3>Product information</h3><span>Review and edit if needed</span></div>
+          <div class="field-grid">
+            <label class="field wide"><span>Product title</span><span class="input-wrap"><input id="title" value="Pink printed cotton kurti"></span></label>
+            <label class="field"><span>Category</span><span class="select-wrap"><select id="sub"><option value="kurti">kurti</option></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span>Colour</span><span class="select-wrap"><select id="color"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span>Fabric</span><span class="select-wrap"><select id="fabric"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span>Pattern</span><span class="select-wrap"><select id="pattern"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span>Weight</span><span class="input-wrap"><input id="weight_kg" type="number" step="0.01" min="0" value="0.35"><b>kg</b></span></label>
+          </div>
+        </section>
+
+        <section class="card costs-card">
+          <div class="card-title compact"><div><span class="section-number">2</span><div><h2>Your costs &amp; profit</h2><p>Enter cost for one product.</p></div></div></div>
+          <div class="cost-callout"><svg aria-hidden="true" class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7h.01"/></svg><span>Use your actual costs. We&apos;ll include return risk and taxes automatically.</span></div>
+          <div class="field-grid costs">
+            <label class="field"><span>Product / fabric cost</span><span class="input-wrap"><input id="cogs" type="number" min="0" value="150"><b>₹</b></span></label>
+            <label class="field"><span>Labour &amp; stitching</span><span class="input-wrap"><input id="labor" type="number" min="0" value="20"><b>₹</b></span></label>
+            <label class="field"><span>Packaging</span><span class="input-wrap"><input id="packaging" type="number" min="0" value="10"><b>₹</b></span></label>
+            <label class="field"><span>Profit you want per order</span><span class="input-wrap"><input id="target_profit" type="number" min="0" value="40"><b>₹</b></span></label>
+          </div>
+          <div class="cost-total"><span>Your total product cost</span><strong id="costTotal">₹180</strong></div>
+          <button class="primary-button" id="calcBtn" type="button">Show my best price <svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button>
+          <p class="safe-note"><svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>We will never suggest a price below your break-even point.</p>
+        </section>
       </div>
+
+      <aside class="results-column">
+        <section class="recommendation" id="recommendation">
+          <div class="result-top">
+            <span class="result-label"><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/></svg>Recommended launch price</span>
+            <span class="confidence" id="confidenceTag">Best match</span>
+          </div>
+          <div class="price-row"><div><span class="rupee">₹</span><strong id="bigPrice">289</strong></div><span class="profit-pill" id="profitPill">+₹51 profit / order</span></div>
+          <p class="price-explainer" id="priceExplainer">Competitive for buyers and safely above your costs.</p>
+          <div class="market-summary">
+            <div><span>Similar products sell for</span><strong id="band">₹269 – ₹320</strong></div>
+            <div><span>Expected return risk</span><strong id="riskVal">34%</strong></div>
+          </div>
+          <div class="price-control">
+            <div class="control-head"><div><h3>Try another price</h3><p>See how it changes your profit.</p></div><output id="priceOut">₹289</output></div>
+            <input class="range" id="range" type="range" min="234" max="320" step="1" value="289" aria-label="Listing price in rupees">
+            <div class="range-labels"><span><b id="lblBe">₹234</b>Break-even</span><span><b id="lblFloor">₹277</b>Safe price</span><span><b id="lblTop">₹320</b>Market top</span></div>
+            <div class="price-status" id="priceStatus"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>Good balance</div>
+          </div>
+          <details class="breakdown">
+            <summary><span id="breakdownTitle">How we calculated ₹289</span><span>View details <svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></summary>
+            <div class="breakdown-grid"><span>Product costs</span><b id="bCosts">₹180</b><span>Return &amp; delivery risk</span><b id="bRisk">₹38</b><span>Taxes</span><b id="bTax">₹20</b><span>Your profit</span><b class="positive" id="bProfit">₹51</b></div>
+          </details>
+          <button class="list-button" id="listBtn" type="button">Use ₹289 as my price <svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button>
+          <button class="secondary-button" id="saveBtn" type="button">Save and finish later</button>
+        </section>
+
+        <section class="card improve-card">
+          <div class="improve-heading"><div><span class="section-number">3</span><div><h2>Reduce returns, earn more</h2><p>Complete these before listing.</p></div></div><span class="task-count" id="taskCount">0/3 done</span></div>
+          <label class="action-item" id="actSize"><input type="checkbox" id="has_size_chart"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong>Add a size chart</strong><small id="sizeCopy">Could reduce returns by 8%</small></span><span class="impact" id="sizeImpact">High impact</span></label>
+          <label class="action-item" id="actFabric"><input type="checkbox" id="has_fabric_card"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong>Add fabric &amp; GSM details</strong><small id="fabricCopy">Helps buyers know what to expect</small></span><span class="impact" id="fabricImpact">5% fewer returns</span></label>
+          <label class="action-item" id="actPhotos"><input type="checkbox" id="more_photos"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong>Add 3 more product photos</strong><small id="photosCopy">Show the back, fabric and close-up</small></span><span class="impact" id="photosImpact">More buyer trust</span></label>
+        </section>
+
+        <section class="whatsapp-card">
+          <div class="whatsapp-head"><span><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.5L3 20.5l1.3-4.7A8.5 8.5 0 1 1 20.5 11.7Z"/><path d="M8.5 8.2c.3 2.9 2.5 5 5.3 5.5"/></svg>Vyapar-AI on WhatsApp</span><b>Preview</b></div>
+          <div class="message" id="waMsg">Add a simple size chart so buyers pick the right size — it can cut size-related returns.<small>10:42 AM <svg aria-hidden="true" class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></small></div>
+          <p>We&apos;ll send simple reminders in the language you choose.</p>
+        </section>
+      </aside>
     </div>
-  </section>
-</main>
+  </main>
+
+  <div class="mobile-action"><div><span>Your best price</span><strong id="mobPrice">₹289</strong></div><button id="mobBtn" type="button">Review price <svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button></div>
+</div>
+
 <script>
-const rs = x => (x < 0 ? "−₹" : "₹") + Math.round(Math.abs(x)).toLocaleString("en-IN");
-const pct = x => (x * 100).toFixed(0) + "%";
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const $ = id => document.getElementById(id);
-const chat = $("chat");
-const VERDICT = { loss: "Loss on every order", below_target: "Below your target profit",
-                  ok: "Good price", overpriced: "Above market band" };
-const LEVER_DONE = { add_size_chart: "Size chart add kar diya ✓", add_fabric_card: "Fabric/GSM card add kar diya ✓",
-                     more_photos: "5 photos upload kar di ✓" };
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var rs = function (x) { return "₹" + Math.round(Math.abs(x)).toLocaleString("en-IN"); };
+  var rsSigned = function (x) { return (x < 0 ? "−₹" : "₹") + Math.round(Math.abs(x)).toLocaleString("en-IN"); };
+  var pct = function (x) { return Math.round(x * 100) + "%"; };
 
-let lastBody = null, last = null, photoNudges = [];
-
-/* ---------- accordion ---------- */
-const ACC = [null,
-  { sec: $("sec1"), btn: $("accBtn1"), sum: $("sum1") },
-  { sec: $("sec2"), btn: $("accBtn2"), sum: $("sum2") },
-  { sec: $("sec3"), btn: $("accBtn3"), sum: $("sum3") },
-];
-function isOpen(n) { return ACC[n].sec.classList.contains("open"); }
-function setOpen(n, open) {
-  const a = ACC[n];
-  a.sec.classList.toggle("open", open);
-  a.btn.setAttribute("aria-expanded", open ? "true" : "false");
-}
-function toggleAcc(n) { setOpen(n, !isOpen(n)); }
-ACC.slice(1).forEach((a, i) => a.btn.addEventListener("click", () => toggleAcc(i + 1)));
-
-function updateSum1() {
-  const t = ($("title").value || "").trim();
-  const n = photoFiles.length;
-  const parts = [];
-  if (t) parts.push(t);
-  if (n) parts.push(n + (n === 1 ? " photo" : " photos"));
-  ACC[1].sum.textContent = parts.join(" · ");
-}
-function updateSum3() {
-  const n = chat.querySelectorAll(".bubble").length;
-  ACC[3].sum.textContent = n ? n + (n === 1 ? " message" : " messages") : "";
-}
-function afterChatAppend() {
-  updateSum3();
-  if (!isOpen(3)) setOpen(3, true);
-}
-function syncImageCount() {
-  const el = $("image_count");
-  el.value = photoFiles.length ? photoFiles.length : 3;
-}
-$("title").addEventListener("input", updateSum1);
-
-fetch("/api/subcategories").then(r => r.json()).then(t => {
-  const sel = $("sub");
-  for (const [cat, subs] of Object.entries(t)) {
-    const g = document.createElement("optgroup"); g.label = cat.replace("_", " ");
-    subs.forEach(s => g.appendChild(new Option(s.replaceAll("_", " "), s)));
-    sel.appendChild(g);
-  }
-  sel.value = "kurti";
-});
-
-function formBody() {
-  const fd = new FormData($("f")), body = {};
-  for (const [k, v] of fd.entries()) body[k] = v;
-  for (const k of ["cogs","labor","packaging","target_profit","weight_kg","image_count","photo_issues"]) body[k] = Number(body[k] || 0);
-  body.has_size_chart = fd.has("has_size_chart"); body.has_fabric_card = fd.has("has_fabric_card");
-  return body;
-}
-
-async function api(path, body) {
-  const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Request failed (" + r.status + ")");
-  return data;
-}
-
-async function runDay0() {
-  lastBody = formBody();
-  last = await api("/api/day0", lastBody);
-  renderResult(last);
-  return last;
-}
-
-$("f").addEventListener("submit", async e => {
-  e.preventDefault();
-  const btn = $("go"); btn.disabled = true; btn.textContent = "Analysing market…";
-  try {
-    const d = await runDay0();
-    chat.innerHTML = "";
-    d.nudges.forEach(botCard);
-    photoNudges.forEach(botCard);
-    updateSum3();
-    setOpen(1, false);
-    setOpen(2, true);
-  } catch (err) {
-    $("result").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
-    setOpen(2, true);
-  } finally { btn.disabled = false; btn.textContent = "Get launch price"; }
-});
-
-/* ---------- result panel + slider ---------- */
-function marginAt(price, d) {
-  const c = d.cost_breakdown;
-  return price * (1 - c.tax_rate) - (c.cogs + c.labor + c.packaging + (c.platform_fees || 0))
-         - c.expected_rto_cost - c.expected_return_cost;
-}
-function verdictAt(price, d) {
-  if (price < d.recommendation.break_even) return "loss";
-  if (price < d.recommendation.floor_price) return "below_target";
-  if (price > d.market.band_high) return "overpriced";
-  return "ok";
-}
-
-function renderResult(d) {
-  const rec = d.recommendation, m = d.market, k = d.risk, c = d.cost_breakdown;
-  const lo = Math.floor(rec.break_even * 0.85), hi = Math.ceil(Math.max(m.band_high * 1.2, rec.recommended_price * 1.15));
-  const at = v => ((v - lo) / (hi - lo)) * 100;
-  const be = at(rec.break_even), fl = at(rec.floor_price), bh = at(m.band_high);
-  const track = `linear-gradient(90deg, var(--red) 0 ${be}%, var(--amber) ${be}% ${fl}%, var(--green) ${fl}% ${bh}%, var(--amber) ${bh}% 100%)`;
-  const mark = (v, label, color) => {
-    const p = at(v), edge = p < 8 ? " edge-l" : p > 92 ? " edge-r" : "";
-    return `<div class="mark${edge}" style="left:${p}%;color:${color}"><b>${rs(v)}</b>${label}</div>`;
+  var PATHS = {
+    arrow: '<path d="M5 12h14"/><path d="m14 7 5 5-5 5"/>',
+    check: '<path d="m5 12 4 4L19 6"/>',
+    chevron: '<path d="m8 10 4 4 4-4"/>',
+    image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7h.01"/>'
   };
-  $("result").innerHTML = `
-    <div class="big" id="bigPrice">${rs(rec.recommended_price)}</div>
-    <div class="sub">Competitor band ${rs(m.band_low)} – ${rs(m.band_high)} (median ${rs(m.median_price)}) ·
-      support: ${m.support} similar listings (${m.level})</div>
-    <div class="stats">
-      <div class="stat"><b>${pct(k.predicted_return_rate)}</b><span>Predicted return risk</span></div>
-      <div class="stat"><b>${pct(k.predicted_rto_rate)}</b><span>Predicted RTO risk</span></div>
-      <div class="stat"><b id="statMargin">${rs(rec.expected_unit_margin)}</b><span>Expected margin / order</span></div>
-    </div>
-    <div id="listedBox"></div>
-    <div class="slider">
-      <div class="slider-head"><h3>Try a price</h3><span class="hint">Drag to see your margin at any price</span></div>
-      <div class="rangewrap">
-        <input type="range" id="priceRange" min="${lo}" max="${hi}" step="1" value="${rec.recommended_price}"
-               style="--track:${track}" aria-label="Listing price in rupees">
-      </div>
-      <div class="marks">
-        ${mark(rec.break_even, "Break-even", "var(--red)")}
-        ${mark(rec.floor_price, "Floor P₀", "var(--amber)")}
-        ${mark(m.band_high, "Band top", "var(--amber)")}
-      </div>
-      <div class="readout">
-        <span class="p" id="rPrice"></span>
-        <span class="m" id="rMargin"></span>
-        <span class="chip" id="rVerdict"></span>
-      </div>
-      <div class="slider-actions">
-        <button type="button" class="btn primary" id="listAt"></button>
-        <button type="button" class="btn" id="resetPrice">Reset to ${rs(rec.recommended_price)}</button>
-      </div>
-    </div>
-    <h2 style="margin-top:18px">How we got here (P₀ floor = ${rs(rec.floor_price)})</h2>
-    <table>
-      <tr><td>Product cost</td><td>${rs(c.cogs)}</td></tr>
-      <tr><td>Labour</td><td>${rs(c.labor)}</td></tr>
-      <tr><td>Packaging</td><td>${rs(c.packaging)}</td></tr>
-      ${c.platform_fees ? `<tr><td>Platform / shipping fees</td><td>${rs(c.platform_fees)}</td></tr>` : ""}
-      <tr><td>Expected RTO cost (${pct(k.predicted_rto_rate)} × ${rs(c.c_rto)})</td><td>${rs(c.expected_rto_cost)}</td></tr>
-      <tr><td>Expected return cost (${pct(k.predicted_return_rate)} × ${rs(c.c_damage)})</td><td>${rs(c.expected_return_cost)}</td></tr>
-      <tr><td>Target profit</td><td>${rs(c.target_profit)}</td></tr>
-      <tr><td>÷ (1 − GST/TCS/TDS ${pct(c.tax_rate)})</td><td><b>${rs(rec.floor_price)}</b></td></tr>
-    </table>
-    ${rec.warnings.map(w => `<div class="warn">${esc(w)}</div>`).join("")}
-    <h2 style="margin-top:18px">Similar listings</h2>
-    <table>${m.neighbours.map(n => `<tr><td>${esc(n.title)} <span class="muted">(RTO ${pct(n.rto_rate)})</span></td><td>${rs(n.price)}</td></tr>`).join("")}</table>`;
+  var svg = function (n, s) { s = s || 18; return '<svg aria-hidden="true" class="icon" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + PATHS[n] + '</svg>'; };
+  var ICO = { arrow: svg("arrow"), check: svg("check"), info: svg("info", 15) };
 
-  const range = $("priceRange");
-  const update = () => {
-    const p = Number(range.value), v = verdictAt(p, d), mg = marginAt(p, d);
-    $("rPrice").textContent = rs(p);
-    $("rMargin").textContent = (mg >= 0 ? "Margin " : "Loss ") + rs(Math.abs(mg)) + " / order";
-    const chip = $("rVerdict"); chip.className = "chip v-" + v; chip.textContent = VERDICT[v];
-    $("listAt").textContent = "List at " + rs(p);
-    range.setAttribute("aria-valuetext", rs(p) + ", " + VERDICT[v]);
-  };
-  range.addEventListener("input", update);
-  $("resetPrice").addEventListener("click", () => { range.value = rec.recommended_price; update(); });
-  $("listAt").addEventListener("click", () => {
-    const p = Number(range.value);
-    mine("List at " + rs(p));
-    acceptPrice(p);
-  });
-  update();
-  ACC[2].sum.textContent = rs(rec.recommended_price);
-}
+  var FABRICS = ["cotton", "rayon", "silk", "polyester", "georgette", "linen"];
+  var PATTERNS = ["printed", "solid", "embroidered", "woven", "striped", "floral"];
+  var COLORS = ["pink", "red", "blue", "green", "yellow", "black", "white", "purple", "orange"];
 
-function showListed(listing) {
-  $("listedBox").innerHTML = `<div class="listed">Listed at <b>${rs(listing.price)}</b> · ID ${esc(listing.listing_id)} ·
-    ${listing.unit_margin >= 0 ? "margin" : "loss"} ${rs(Math.abs(listing.unit_margin))} / order</div>`;
-}
+  var photos = [], lastBody = null, day0 = null, report = null, lang = "EN", debounce = null;
 
-/* ---------- chat ---------- */
-function scrollChat() { chat.scrollTop = chat.scrollHeight; }
-function mine(text) {
-  const b = document.createElement("div"); b.className = "bubble mine"; b.textContent = text;
-  chat.appendChild(b); scrollChat(); afterChatAppend();
-}
-function bot(text) {
-  const b = document.createElement("div"); b.className = "bubble"; b.textContent = text;
-  chat.appendChild(b); scrollChat(); afterChatAppend(); return b;
-}
-function botCard(card) {
-  const b = bot(card.text);
-  if (card.actions && card.actions.length) {
-    const acts = document.createElement("div"); acts.className = "acts";
-    card.actions.forEach(a => {
-      const btn = document.createElement("button"); btn.type = "button"; btn.textContent = a.label;
-      btn.addEventListener("click", () => {
-        acts.querySelectorAll("button").forEach(x => x.disabled = true);
-        btn.classList.add("chosen");
-        mine(a.label);
-        handle(a, b);
-      });
-      acts.appendChild(btn);
+  function fill(sel, values) { sel.innerHTML = ""; values.forEach(function (v) { sel.appendChild(new Option(v, v)); }); }
+  fill($("fabric"), FABRICS); fill($("pattern"), PATTERNS); fill($("color"), COLORS);
+
+  fetch("/api/subcategories").then(function (r) { return r.json(); }).then(function (t) {
+    var sel = $("sub"); sel.innerHTML = "";
+    Object.keys(t).forEach(function (cat) {
+      var g = document.createElement("optgroup"); g.label = cat.replace(/_/g, " ");
+      (t[cat] || []).forEach(function (s) { g.appendChild(new Option(s.replaceAll("_", " "), s)); });
+      sel.appendChild(g);
     });
-    b.appendChild(acts);
+    sel.value = "kurti"; updateAttrs();
+  }).catch(function () { $("sub").innerHTML = '<option value="kurti">kurti</option>'; });
+
+  function num(id) { var v = Number($(id).value); return isFinite(v) ? v : 0; }
+  function imgCount() { var n = photos.length; if ($("more_photos").checked) n = Math.max(5, n || 3); return n || 3; }
+
+  function currentBody() {
+    return {
+      title: ($("title").value || "").trim() || "Product",
+      subcategory: $("sub").value || "kurti",
+      cogs: num("cogs"), labor: num("labor"), packaging: num("packaging"), target_profit: num("target_profit"),
+      fabric: $("fabric").value, pattern: $("pattern").value, color: $("color").value,
+      weight_kg: num("weight_kg") || 0.4,
+      has_size_chart: $("has_size_chart").checked, has_fabric_card: $("has_fabric_card").checked,
+      image_count: imgCount(), seller_name: "Ramesh",
+      photo_issues: report && report.issues ? report.issues.length : 0
+    };
   }
-  return b;
-}
-
-async function handle(a, bubble) {
-  try {
-    if (a.id === "accept_price") return await acceptPrice(a.price);
-    if (a.id === "keep_price") return askPrice();
-    if (a.id === "explain") return bot(last.explanation);
-    if (a.id === "apply_lever") return await applyLever(a.lever);
-    if (a.id === "dismiss") { bubble.classList.add("faded"); return bot("Theek hai, baad mein yaad dila denge. 👍"); }
-  } catch (err) { bot("Kuch gadbad ho gayi: " + err.message + ". Dobara try karein."); }
-}
-
-async function acceptPrice(price) {
-  const res = await api("/api/listings", { product: lastBody, price });
-  bot(res.message);
-  showListed(res.listing);
-}
-
-function askPrice() {
-  const b = bot("Aap kis daam par bechna chahte hain? Hum check kar dete hain.");
-  const form = document.createElement("form"); form.className = "ask";
-  const id = "ask-" + Date.now();
-  form.innerHTML = `<label for="${id}" class="muted" style="position:absolute;left:-9999px">Your price in rupees</label>
-    <input id="${id}" type="number" min="1" step="1" placeholder="e.g. 299" required>
-    <button type="submit" class="btn primary">Check</button>`;
-  b.appendChild(form);
-  form.querySelector("input").focus();
-  form.addEventListener("submit", async e => {
-    e.preventDefault();
-    const price = Math.round(Number(form.querySelector("input").value));
-    if (!price) return;
-    form.querySelectorAll("input,button").forEach(x => x.disabled = true);
-    mine(rs(price));
-    try {
-      const res = await api("/api/price-check", { product: lastBody, price });
-      botCard(res.card);
-      const range = $("priceRange");
-      if (range) { range.value = price; range.dispatchEvent(new Event("input")); }
-    } catch (err) { bot("Kuch gadbad ho gayi: " + err.message); }
-  });
-}
-
-async function applyLever(lever) {
-  const before = last;
-  if (lever === "add_size_chart") $("has_size_chart").checked = true;
-  if (lever === "add_fabric_card") $("has_fabric_card").checked = true;
-  if (lever === "more_photos") $("image_count").value = Math.max(5, Number($("image_count").value || 0));
-  bot(LEVER_DONE[lever] ? "Bahut badhiya! Naya hisaab laga rahe hain…" : "Naya hisaab laga rahe hain…");
-  const d = await runDay0();
-  const r0 = before.risk.predicted_return_rate, r1 = d.risk.predicted_return_rate;
-  const oldPrice = before.recommendation.recommended_price, newPrice = d.recommendation.recommended_price;
-  // Same price, lower risk: show the gain the seller actually gets at the price they knew.
-  let msg = `${LEVER_DONE[lever] || "Update ho gaya"}. Return risk ${pct(r0)} → ${pct(r1)}. ` +
-            `${rs(oldPrice)} par ab har order par ${rs(marginAt(oldPrice, d))} munafa bachega ` +
-            `(pehle ${rs(before.recommendation.expected_unit_margin)}).`;
-  if (newPrice < oldPrice) {
-    msg += ` Ya ab ${rs(newPrice)} par list karke sasta daam aur zyada orders paayein.`;
+  function updateCostTotal() { $("costTotal").textContent = rs(num("cogs") + num("labor") + num("packaging")); }
+  function titleCase(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  function updateAttrs() {
+    var parts = [($("sub").value || "").replaceAll("_", " "), $("fabric").value, $("pattern").value].filter(Boolean);
+    $("pmAttrs").textContent = parts.map(titleCase).join(" · ");
+    $("pmTitle").textContent = ($("title").value || "").trim() || "Your product";
   }
-  bot(msg);
-  botCard(d.nudges[0]);
-}
-
-/* ---------- photo upload + extraction ---------- */
-const MAX_PHOTOS = 8;
-const ISSUE_BADGE = { blurry: "Blurry", too_dark: "Too dark", overexposed: "Too bright", low_resolution: "Low res" };
-const ISSUE_TIP = {
-  low_resolution: "use the original camera photo, not a downloaded image or screenshot",
-  blurry: "hold the phone steady and tap the product to focus",
-  too_dark: "shoot in daylight, near a window",
-  overexposed: "avoid flash and harsh direct sunlight",
-};
-const SWATCH = { pink:"#e5407f", red:"#d0202f", blue:"#2f55c8", green:"#2e8b57", yellow:"#e6b800",
-                 black:"#222", white:"#fff", purple:"#7b3fa0", orange:"#f08a24" };
-let photoFiles = [], photoReq = 0;
-
-function flash(el) { el.classList.remove("filled"); void el.offsetWidth; el.classList.add("filled"); }
-function markAuto(id) {
-  const label = document.querySelector(`label[for="${id}"]`);
-  if (label && !label.querySelector(".auto")) {
-    const tag = document.createElement("span"); tag.className = "auto"; tag.textContent = "from photo";
-    label.appendChild(tag);
+  function toast(msg) {
+    var t = $("toast");
+    if (!t) { t = document.createElement("div"); t.id = "toast"; t.className = "toast"; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove("show"); }, 4500);
   }
-}
-function clearAuto(id) { const t = document.querySelector(`label[for="${id}"] .auto`); if (t) t.remove(); }
-["title", "sub", "fabric", "pattern", "color"].forEach(id => $(id).addEventListener("input", () => clearAuto(id)));
-function setField(id, value) {
-  const el = $(id);
-  if (!el || value === null || value === undefined || value === "") return false;
-  if (el.tagName === "SELECT" && ![...el.options].some(o => o.value === value)) return false;
-  if (el.value === String(value)) return false;
-  el.value = value; flash(el); markAuto(id); return true;
-}
-
-function addPhotos(list) {
-  const ok = [...list].filter(f => /^image\/(jpeg|png|webp)$/.test(f.type));
-  for (const f of ok) {
-    if (photoFiles.length >= MAX_PHOTOS) break;
-    if (!photoFiles.some(g => g.name === f.name && g.size === f.size)) photoFiles.push(f);
+  function api(path, payload) {
+    return fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Request failed (" + r.status + ")"); return d; }); });
   }
-  if (ok.length < list.length) showPhotoError("Only JPEG, PNG or WebP photos can be added.");
-  renderThumbs();
-  analyse();
-}
-function removePhoto(i) {
-  photoFiles.splice(i, 1);
-  renderThumbs();
-  analyse();
-}
 
-function renderThumbs(report) {
-  const thumbs = $("thumbs");
-  thumbs.innerHTML = "";
-  $("dzEmpty").hidden = photoFiles.length > 0;
-  photoFiles.forEach((f, i) => {
-    const fig = document.createElement("figure"); fig.className = "thumb";
-    const img = document.createElement("img"); img.alt = `Photo ${i + 1}: ${f.name}`;
-    img.src = f._url || (f._url = URL.createObjectURL(f));
-    fig.appendChild(img);
-    if (i === 0) { const c = document.createElement("span"); c.className = "cover"; c.textContent = "Cover"; fig.appendChild(c); }
-    const rm = document.createElement("button"); rm.type = "button"; rm.className = "rm"; rm.textContent = "×";
-    rm.setAttribute("aria-label", `Remove photo ${i + 1}`); rm.addEventListener("click", () => removePhoto(i));
-    fig.appendChild(rm);
-    const p = report && report.photos[i];
-    if (p) {
-      const badge = document.createElement("span"); badge.className = "badge";
-      if (p.issues.length) { badge.textContent = ISSUE_BADGE[p.issues[0]] || p.issues[0]; fig.title = p.issues.map(x => ISSUE_BADGE[x] || x).join(", "); }
-      else { badge.textContent = "Good"; fig.classList.add("ok"); }
-      fig.appendChild(badge);
+  function setLoading(on) {
+    var b = $("calcBtn"); b.disabled = on;
+    b.innerHTML = on ? '<span class="spinner"></span>Calculating your safe price…' : "Show my best price " + ICO.arrow;
+  }
+  function runDay0(spin, silent) {
+    lastBody = currentBody();
+    if (spin) setLoading(true);
+    return api("/api/day0", lastBody).then(function (d) {
+      day0 = d; renderRecommendation(d); updateLeversFromApi(d); updateWhatsApp();
+    }).catch(function (e) {
+      if (!silent) toast("Couldn't reach the pricing service. " + e.message);
+    }).then(function () { if (spin) setLoading(false); });
+  }
+
+  function marginAt(p, d) {
+    var c = d.cost_breakdown;
+    return p * (1 - c.tax_rate) - (c.cogs + c.labor + c.packaging + (c.platform_fees || 0)) - c.expected_rto_cost - c.expected_return_cost;
+  }
+  function verdictAt(p, d) {
+    if (p < d.recommendation.break_even) return { label: "Below break-even — you would lose money", warn: true };
+    if (p < d.recommendation.floor_price) return { label: "Below your safe price", warn: true };
+    if (p > d.market.band_high) return { label: "Higher price, slower sales", warn: true };
+    return { label: "Good balance", warn: false };
+  }
+
+  function renderRecommendation(d) {
+    var rec = d.recommendation, m = d.market, k = d.risk;
+    var be = Math.floor(rec.break_even), top = Math.ceil(Math.max(m.band_high, rec.recommended_price)), floor = Math.round(rec.floor_price);
+    var lo = Math.max(1, Math.floor(be * 0.9)), span = Math.max(1, top - lo);
+    var range = $("range"); range.min = lo; range.max = top; range.value = Math.round(rec.recommended_price);
+    var bePct = Math.round(((be - lo) / span) * 100), flPct = Math.max(bePct + 1, Math.round(((floor - lo) / span) * 100));
+    range.style.background = "linear-gradient(to right, #ce4052 0 " + bePct + "%, #d8952a " + bePct + "% " + flPct + "%, #39a067 " + flPct + "% 100%)";
+    $("lblBe").textContent = rs(be); $("lblFloor").textContent = rs(floor); $("lblTop").textContent = rs(top);
+    $("band").textContent = rs(m.band_low) + " – " + rs(m.band_high);
+    $("riskVal").textContent = pct(k.predicted_return_rate);
+    $("riskVal").className = k.predicted_return_rate <= 0.25 ? "positive" : "";
+    $("confidenceTag").textContent = (m.level === "subcategory" && m.support >= 8) ? "Best match" : "Estimated";
+    $("priceExplainer").textContent = rec.position === "above_band"
+      ? "Above the market band — buyers may compare on price."
+      : "Competitive for buyers and safely above your costs.";
+    $("step2sub").textContent = rs(rec.recommended_price) + " recommended";
+    updatePrice(Number(range.value));
+  }
+
+  function updatePrice(p) {
+    if (!day0) return;
+    var d = day0, c = d.cost_breakdown, margin = marginAt(p, d), v = verdictAt(p, d);
+    $("bigPrice").textContent = Math.round(p);
+    $("priceOut").textContent = rs(p);
+    $("mobPrice").textContent = rs(p);
+    $("profitPill").textContent = (margin >= 0 ? "+" : "−") + rs(Math.abs(margin)) + " profit / order";
+    $("listBtn").innerHTML = "Use " + rs(p) + " as my price " + ICO.arrow;
+    $("breakdownTitle").textContent = "How we calculated " + rs(p);
+    $("bCosts").textContent = rs(c.cogs + c.labor + c.packaging + (c.platform_fees || 0));
+    $("bRisk").textContent = rs(c.expected_rto_cost + c.expected_return_cost);
+    $("bTax").textContent = rs(p * c.tax_rate);
+    $("bProfit").textContent = rsSigned(margin);
+    var st = $("priceStatus");
+    st.className = "price-status" + (v.warn ? " warning" : "");
+    st.innerHTML = (v.warn ? ICO.info : ICO.check) + esc(v.label);
+    $("range").setAttribute("aria-valuetext", rs(p));
+  }
+
+  var LEVER_EN = {
+    add_size_chart: "Add a simple size chart so buyers pick the right size — it can cut size-related returns.",
+    add_fabric_card: "Add a fabric & GSM card so buyers know exactly what to expect.",
+    more_photos: "Add a few more photos (back, fabric, close-up) to build buyer trust."
+  };
+  function updateLeversFromApi(d) {
+    var byId = {}; (d.levers || []).forEach(function (l) { byId[l.lever] = l; });
+    var set = function (lever, copyEl, defCopy) {
+      var l = byId[lever];
+      copyEl.textContent = (l && l.relative_drop != null) ? "Could reduce returns by " + Math.round(l.relative_drop * 100) + "%" : defCopy;
+    };
+    set("add_size_chart", $("sizeCopy"), "Could reduce returns by 8%");
+    set("add_fabric_card", $("fabricCopy"), "Helps buyers know what to expect");
+    set("more_photos", $("photosCopy"), "Show the back, fabric and close-up");
+    updateTaskCount();
+  }
+  function updateTaskCount() {
+    var applied = ["has_size_chart", "has_fabric_card", "more_photos"].filter(function (id) { return $(id).checked; }).length;
+    $("taskCount").textContent = applied + "/3 done";
+    [["has_size_chart", "actSize"], ["has_fabric_card", "actFabric"], ["more_photos", "actPhotos"]].forEach(function (pair) {
+      $(pair[1]).classList.toggle("completed", $(pair[0]).checked);
+    });
+  }
+
+  function updateWhatsApp() {
+    var el = $("waMsg");
+    if (lang === "हि" && day0) {
+      var n = (day0.nudges || []).filter(function (x) { return x.type === "lever_nudge"; })[0] || (day0.nudges || [])[0];
+      if (n) { el.textContent = n.text; tick(el); return; }
     }
-    thumbs.appendChild(fig);
+    var key = day0 && day0.levers && day0.levers[0] ? day0.levers[0].lever : null;
+    el.textContent = LEVER_EN[key] || "Keep your price above the safe floor and add a size chart to reduce returns.";
+    tick(el);
+  }
+  function tick(el) { var s = document.createElement("small"); s.innerHTML = "10:42 AM " + svg("check", 12); el.appendChild(s); }
+
+  function setCover() {
+    var img = $("coverImg"), empty = $("phEmpty"), cnt = $("photoCount");
+    if (photos.length) {
+      var f = photos[0];
+      if (f._url) URL.revokeObjectURL(f._url);
+      f._url = URL.createObjectURL(f);
+      img.src = f._url; img.hidden = false; empty.hidden = true;
+      cnt.hidden = false; cnt.textContent = photos.length + (photos.length > 1 ? " photos" : " photo");
+    } else {
+      img.hidden = true; img.removeAttribute("src"); empty.hidden = false; cnt.hidden = true;
+    }
+  }
+  function updateQuality() {
+    var badge = $("qualityBadge");
+    var bad = report && report.photos ? report.photos.filter(function (p) { return p.issues && p.issues.length; }).length : 0;
+    if (bad) { badge.className = "quality-badge warn"; badge.innerHTML = svg("info", 13) + (bad === 1 ? "1 photo needs a retake" : bad + " photos need a retake"); }
+    else { badge.className = "quality-badge"; badge.innerHTML = svg("check", 13) + (photos.length ? "Photo looks good" : "Add a photo to auto-fill"); }
+  }
+  function addPhotos(list) {
+    var arr = [].slice.call(list), ok = arr.filter(function (f) { return /^image\/(jpeg|png|webp)$/.test(f.type); });
+    if (ok.length < arr.length) toast("Only JPEG, PNG or WebP photos can be added.");
+    ok.forEach(function (f) { if (!photos.some(function (g) { return g.name === f.name && g.size === f.size; })) photos.push(f); });
+    if (photos.length > 8) { photos = photos.slice(0, 8); toast("Up to 8 photos at a time."); }
+    setCover(); analyzePhotos();
+  }
+  function analyzePhotos() {
+    if (!photos.length) { report = null; updateQuality(); return; }
+    var fd = new FormData();
+    photos.forEach(function (f) { fd.append("files", f); });
+    fd.append("seller_name", "Ramesh");
+    $("productHint").textContent = "Reading your photos…";
+    fetch("/api/photos/analyze", { method: "POST", body: fd })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Photo analysis failed"); return d; }); })
+      .then(function (d) { report = d; applyReport(d); })
+      .catch(function (e) { $("productHint").textContent = "We filled in what we could from your photo."; toast("Photo analysis failed. " + e.message); });
+  }
+  function applyReport(d) {
+    var s = d.suggested || {};
+    var setIf = function (id, val) {
+      if (val == null || val === "") return false;
+      var el = $(id);
+      if (el.tagName === "SELECT" && ![].slice.call(el.options).some(function (o) { return o.value === val; })) return false;
+      if (el.value === String(val)) return false;
+      el.value = val; return true;
+    };
+    var filled = [];
+    if (setIf("sub", s.subcategory)) filled.push("category");
+    if (setIf("fabric", s.fabric)) filled.push("fabric");
+    if (setIf("pattern", s.pattern)) filled.push("pattern");
+    if (setIf("color", s.color)) filled.push("colour");
+    if (s.title && setIf("title", s.title)) filled.push("title");
+    if (s.has_size_chart && !$("has_size_chart").checked) { $("has_size_chart").checked = true; filled.push("size chart"); }
+    if (s.has_fabric_card && !$("has_fabric_card").checked) { $("has_fabric_card").checked = true; filled.push("fabric card"); }
+    updateAttrs();
+    var n = d.photos ? d.photos.length : photos.length;
+    var chips = [s.subcategory && s.subcategory.replaceAll("_", " "), s.fabric, s.pattern, s.color].filter(Boolean);
+    var html = "<b>Detected from " + n + " photo" + (n > 1 ? "s" : "") + "</b>: " + (chips.length ? esc(chips.join(" · ")) : "nothing yet");
+    html += (d.backend && d.backend.indexOf("vlm") === 0) ? " · vision model" : " · photo checks";
+    var bad = (d.photos || []).filter(function (p) { return p.issues && p.issues.length; }).length;
+    if (bad) html += ' · <b>' + bad + " photo" + (bad > 1 ? "s" : "") + " need a retake</b>";
+    if (filled.length) html += " · filled in: " + esc(filled.join(", "));
+    var det = $("detected"); det.innerHTML = html; det.hidden = false;
+    updateQuality();
+    $("productHint").textContent = "We filled in what we could from your photo.";
+    updateTaskCount();
+    runDay0(false, true);
+  }
+
+  function schedule() { clearTimeout(debounce); debounce = setTimeout(function () { runDay0(false, true); }, 700); }
+
+  // ---- wiring
+  $("photoCrop").addEventListener("click", function () { $("photos").click(); });
+  $("photoCrop").addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("photos").click(); } });
+  $("changePhotoBtn").addEventListener("click", function () { $("photos").click(); });
+  $("photos").addEventListener("change", function (e) { addPhotos(e.target.files); e.target.value = ""; });
+  ["dragenter", "dragover"].forEach(function (t) { $("photoCrop").addEventListener(t, function (e) { e.preventDefault(); $("photoCrop").classList.add("dragover"); }); });
+  ["dragleave", "drop"].forEach(function (t) { $("photoCrop").addEventListener(t, function (e) { e.preventDefault(); $("photoCrop").classList.remove("dragover"); }); });
+  $("photoCrop").addEventListener("drop", function (e) { addPhotos(e.dataTransfer.files); });
+
+  $("range").addEventListener("input", function (e) { updatePrice(Number(e.target.value)); });
+  $("calcBtn").addEventListener("click", function () { runDay0(true, false); setTimeout(function () { var r = $("recommendation"); if (r && r.scrollIntoView) r.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); });
+  $("mobBtn").addEventListener("click", function () { runDay0(true, false); var r = $("recommendation"); if (r && r.scrollIntoView) r.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  $("saveBtn").addEventListener("click", function () { toast("Saved. You can finish this listing later."); });
+  $("listBtn").addEventListener("click", function () {
+    if (!lastBody) return;
+    var p = Math.round(Number($("range").value));
+    api("/api/listings", { product: lastBody, price: p }).then(function (res) {
+      toast(res.message || "Listed!");
+      $("listBtn").innerHTML = "Listed at " + rs(p) + " " + ICO.check;
+    }).catch(function (e) { toast("Couldn't list: " + e.message); });
   });
-  if (photoFiles.length && photoFiles.length < MAX_PHOTOS) {
-    const add = document.createElement("label"); add.className = "add-tile"; add.htmlFor = "photos";
-    add.title = "Add more photos"; add.innerHTML = '<span aria-hidden="true">+</span><span class="vh">Add more photos</span>';
-    thumbs.appendChild(add);
-  }
-  syncImageCount();
-  updateSum1();
-}
+  $("langBtn").addEventListener("click", function () {
+    lang = lang === "EN" ? "हि" : "EN";
+    $("langBtn").innerHTML = esc(lang) + svg("chevron", 14);
+    updateWhatsApp();
+  });
+  ["has_size_chart", "has_fabric_card", "more_photos"].forEach(function (id) {
+    $(id).addEventListener("change", function () { updateTaskCount(); runDay0(false, true); });
+  });
+  ["title", "sub", "fabric", "pattern", "color", "weight_kg"].forEach(function (id) { $(id).addEventListener("input", function () { updateAttrs(); schedule(); }); });
+  ["cogs", "labor", "packaging", "target_profit"].forEach(function (id) { $(id).addEventListener("input", function () { updateCostTotal(); schedule(); }); });
 
-function showPhotoError(msg) {
-  const st = $("photoStatus"); st.hidden = false;
-  st.innerHTML = `<div class="ps-warn">${esc(msg)}</div>`;
-}
-
-async function analyse() {
-  const st = $("photoStatus");
-  photoNudges = []; $("photo_issues").value = 0;
-  if (!photoFiles.length) { st.hidden = true; st.innerHTML = ""; return; }
-  const req = ++photoReq;
-  st.hidden = false;
-  st.innerHTML = `<div><span class="spinner" aria-hidden="true"></span>Reading your ${photoFiles.length} photo${photoFiles.length > 1 ? "s" : ""}…</div>`;
-  const fd = new FormData();
-  photoFiles.forEach(f => fd.append("files", f));
-  fd.append("seller_name", $("seller_name").value || "Seller");
-  try {
-    const r = await fetch("/api/photos/analyze", { method: "POST", body: fd });
-    const d = await r.json().catch(() => ({}));
-    if (req !== photoReq) return;                       // a newer upload is in flight
-    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Upload failed (" + r.status + ")");
-    applyPhotoReport(d);
-  } catch (err) {
-    if (req === photoReq) showPhotoError(err.message);
-  }
-}
-
-$("photos").addEventListener("change", e => { addPhotos(e.target.files); e.target.value = ""; });
-const dz = $("dropzone");
-["dragenter", "dragover"].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add("over"); }));
-["dragleave", "drop"].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove("over"); }));
-dz.addEventListener("drop", e => addPhotos(e.dataTransfer.files));
-
-function applyPhotoReport(d) {
-  const s = d.suggested, filled = [];
-  if (setField("sub", s.subcategory)) filled.push("sub-category");
-  if (setField("fabric", s.fabric)) filled.push("fabric");
-  if (setField("pattern", s.pattern)) filled.push("pattern");
-  if (setField("color", s.color)) filled.push("colour");
-  if (s.title && setField("title", s.title)) filled.push("title");
-  setField("image_count", s.image_count); clearAuto("image_count");
-  if (s.has_size_chart && !$("has_size_chart").checked) { $("has_size_chart").checked = true; filled.push("size chart"); }
-  if (s.has_fabric_card && !$("has_fabric_card").checked) { $("has_fabric_card").checked = true; filled.push("fabric card"); }
-  $("photo_issues").value = d.photos.reduce((n, p) => n + p.issues.length, 0);
-  photoNudges = d.nudges || [];
-  renderThumbs(d);
-
-  const vlm = d.backend === "vlm";
-  const conf = vlm && s.confidence != null ? ` · ${Math.round(s.confidence * 100)}% sure` : "";
-  const chip = (text, sw) => `<span class="chip2">${sw ? `<span class="swatch" style="background:${sw}"></span>` : ""}${esc(text)}</span>`;
-  const chips = [];
-  if (s.subcategory) chips.push(chip(s.subcategory.replaceAll("_", " ")));
-  if (s.fabric) chips.push(chip(s.fabric));
-  if (s.pattern) chips.push(chip(s.pattern));
-  if (s.color) chips.push(chip(s.color, SWATCH[s.color]));
-  if (s.has_size_chart) chips.push(chip("size chart"));
-  if (s.has_fabric_card) chips.push(chip("fabric label"));
-
-  let html = `<div class="ps-head"><b>Detected from ${d.photos.length} photo${d.photos.length > 1 ? "s" : ""}</b>
-    <span class="src ${vlm ? "vlm" : ""}">${vlm ? "Vision model" + esc(conf) : "Photo checks"}</span></div>`;
-  html += chips.length ? `<div class="chips">${chips.join("")}</div>` : `<div class="ps-note">No product details detected.</div>`;
-  const bad = d.photos.map((p, i) => ({ p, i })).filter(x => x.p.issues.length);
-  if (bad.length) {
-    const kinds = [...new Set(bad.flatMap(x => x.p.issues))];
-    html += `<div class="ps-warn"><b>${bad.length} photo${bad.length > 1 ? "s need" : " needs"} a retake</b> (${
-      bad.map(x => "photo " + (x.i + 1)).join(", ")}): ${esc(kinds.map(k => ISSUE_TIP[k] || k).join("; "))}.</div>`;
-  }
-  if (!vlm) html += `<div class="ps-note">${d.model_error ? "Vision model unavailable right now. " : ""}Colour and photo quality are checked here; category, fabric and pattern need a vision model, so pick them below.</div>`;
-  html += `<div class="ps-note">${filled.length ? "Filled in: " + esc(filled.join(", ")) + ". Check them, then press Get launch price." : "Your form already matches the photos."}</div>`;
-  $("photoStatus").innerHTML = html;
-}
-
-/* ---------- init ---------- */
-updateSum1();
-updateSum3();
+  // ---- initial paint
+  updateCostTotal(); updateAttrs(); setCover(); updateQuality(); updateTaskCount();
+  runDay0(false, true);
+})();
 </script>
 </body>
 </html>
