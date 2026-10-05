@@ -185,7 +185,8 @@
    "waNudgeSize": "Add a simple size chart so buyers pick the right size — it can cut size-related returns.",
    "waNudgeFabric": "Add a fabric & GSM card so buyers know exactly what to expect.",
    "waNudgePhotos": "Add a few more photos (back, fabric, close-up) to build buyer trust.",
-   "waNudgeDefault": "Keep your price above the safe floor and add a size chart to reduce returns."
+   "waNudgeDefault": "Keep your price above the safe floor and add a size chart to reduce returns.",
+   "waSample": "Sample message"
   },
   "hi": {
    "help": "मदद",
@@ -305,7 +306,8 @@
    "waNudgeSize": "रमेश जी, एक आसान साइज़ चार्ट जोड़ें। इससे खरीदार सही साइज़ चुनेंगे और रिटर्न घटेंगे।",
    "waNudgeFabric": "कपड़े और GSM की जानकारी जोड़ें ताकि खरीदार को सही अंदाज़ा मिले।",
    "waNudgePhotos": "पीछे, कपड़ा और क्लोज़-अप की कुछ और फ़ोटो जोड़ें, इससे भरोसा बढ़ता है।",
-   "waNudgeDefault": "अपना दाम सुरक्षित सीमा से ऊपर रखें और रिटर्न घटाने के लिए साइज़ चार्ट जोड़ें।"
+   "waNudgeDefault": "अपना दाम सुरक्षित सीमा से ऊपर रखें और रिटर्न घटाने के लिए साइज़ चार्ट जोड़ें।",
+   "waSample": "मैसेज का उदाहरण"
   },
   "bn": {
    "help": "সাহায্য",
