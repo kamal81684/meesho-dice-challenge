@@ -85,9 +85,22 @@ def architecture():
     return FileResponse(DOCS / "architecture.html")
 
 
+def _engine_ready() -> bool:
+    return engine.cache_info().currsize > 0
+
+
+@app.get("/health", include_in_schema=False)
+def liveness():
+    """Instant liveness check for load balancers (e.g. Render). Never builds the models."""
+    return {"status": "ok"}
+
+
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "decision_backend": engine().decider.name}
+    """Status without forcing the engine build (which takes ~5 s, longer on small CPUs)."""
+    ready = _engine_ready()
+    return {"status": "ok", "engine_ready": ready,
+            "decision_backend": engine().decider.name if ready else None}
 
 
 @app.get("/api/subcategories")

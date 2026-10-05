@@ -82,6 +82,8 @@ python scripts/backtest.py
 | `GET` | `/` | Day-0 listing UI (Slide 5 wireframe) |
 | `POST` | `/api/day0` | Floor P₀, launch price, competitor band, risk, levers, nudges |
 | `POST` | `/api/lifecycle` | Stage detection (launch/scale/defense/salvage), price action, bundles, competitor alert |
+| `GET` | `/health` | Instant liveness check for load balancers (e.g. Render's health check path) |
+| `GET` | `/api/health` | Status, whether the models are built yet, and the active decision backend |
 | `GET` | `/api/subcategories` | Supported taxonomy |
 | `POST` | `/api/price-check` | Margin and verdict (loss / below target / ok / overpriced) for a seller's own price |
 | `POST` | `/api/listings` | List the product at a price (in-memory store in the MVP) |

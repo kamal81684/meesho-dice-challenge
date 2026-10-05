@@ -69,3 +69,16 @@ def test_create_and_list_listing():
     assert body["listing"]["price"] == 289 and body["message"].startswith("Ho gaya!")
     ids = [l["listing_id"] for l in client.get("/api/listings").json()["listings"]]
     assert body["listing"]["listing_id"] in ids
+
+
+def test_health_routes_do_not_build_engine(monkeypatch):
+    import api.main as m
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    m.engine.cache_clear()
+    assert client.get("/health").json() == {"status": "ok"}
+    h = client.get("/api/health").json()
+    assert h == {"status": "ok", "engine_ready": False, "decision_backend": None}
+    assert m.engine.cache_info().currsize == 0
+    client.post("/api/day0", json=KURTI)
+    h = client.get("/api/health").json()
+    assert h["engine_ready"] is True and h["decision_backend"] == "rules"
