@@ -1,6 +1,6 @@
 """Day-0 pricing math (Slide 3).
 
-    P0 = (COGS + Labor + Packaging + r_rto*C_rto + r_ret*C_damage + TargetProfit)
+    P0 = (COGS + Labor + Packaging + Fees + r_rto*C_rto + r_ret*C_damage + TargetProfit)
          / (1 - (GST rate + TCS/TDS rate))
 
 P0 is the break-even-plus-target floor: the engine never recommends below it.
@@ -17,6 +17,7 @@ class CostInputs:
     labor: float = 0.0
     packaging: float = 0.0
     target_profit: float = 0.0
+    platform_fees: float = 0.0  # fixed per-order fees charged to the seller (e.g. shipping)
     r_rto: float = 0.0        # predicted RTO (delivery refusal) probability
     c_rto: float = 0.0        # two-way reverse shipping penalty per RTO
     r_ret: float = 0.0        # predicted customer-return probability
@@ -24,7 +25,7 @@ class CostInputs:
     tax_rate: float = 0.07    # GST + TCS/TDS withheld, as a fraction of price
 
     def validate(self) -> None:
-        for name in ("cogs", "labor", "packaging", "c_rto", "c_damage"):
+        for name in ("cogs", "labor", "packaging", "platform_fees", "c_rto", "c_damage"):
             if getattr(self, name) < 0:
                 raise ValueError(f"{name} must be >= 0")
         for name in ("r_rto", "r_ret"):
@@ -38,24 +39,26 @@ def expected_risk_cost(c: CostInputs) -> float:
     return c.r_rto * c.c_rto + c.r_ret * c.c_damage
 
 
+def fixed_unit_cost(c: CostInputs) -> float:
+    return c.cogs + c.labor + c.packaging + c.platform_fees
+
+
 def floor_price(c: CostInputs) -> float:
     """The 0%-commission Day-0 floor P0."""
     c.validate()
-    numerator = (c.cogs + c.labor + c.packaging + expected_risk_cost(c)
-                 + c.target_profit)
+    numerator = fixed_unit_cost(c) + expected_risk_cost(c) + c.target_profit
     return numerator / (1 - c.tax_rate)
 
 
 def break_even_price(c: CostInputs) -> float:
     """P0 with zero target profit: below this every order loses money."""
     c.validate()
-    return (c.cogs + c.labor + c.packaging + expected_risk_cost(c)) / (1 - c.tax_rate)
+    return (fixed_unit_cost(c) + expected_risk_cost(c)) / (1 - c.tax_rate)
 
 
 def unit_margin(price: float, c: CostInputs) -> float:
     """Expected net cash per shipped order at `price`, after taxes and risk."""
-    return (price * (1 - c.tax_rate) - c.cogs - c.labor - c.packaging
-            - expected_risk_cost(c))
+    return price * (1 - c.tax_rate) - fixed_unit_cost(c) - expected_risk_cost(c)
 
 
 def charm_round(price: float) -> int:
