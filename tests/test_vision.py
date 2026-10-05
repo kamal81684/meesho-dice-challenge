@@ -120,3 +120,28 @@ def test_analyze_endpoint_without_model(monkeypatch):
     bad = client.post("/api/photos/analyze", files=[("files", ("x.txt", b"hi", "text/plain"))])
     assert bad.status_code == 422 and "not a readable image" in bad.json()["detail"]
     m.vision_extractor.cache_clear()
+
+
+def room_photo(garment_rgb, size=(300, 450)):
+    """Model in a room: off-white panelled wall, wooden table, skin, embroidered kurti."""
+    w, h = size
+    img = Image.new("RGB", size, (226, 222, 216))
+    d = ImageDraw.Draw(img)
+    for x in range(0, w, 60):
+        d.rectangle([x + 6, 20, x + 54, h - 60], outline=(205, 200, 195), width=2)
+    d.rectangle([0, h - 60, w, h], fill=(200, 190, 175))
+    d.rectangle([5, int(h * .55), 70, h - 40], fill=(120, 80, 50))
+    d.ellipse([w // 2 - 18, 40, w // 2 + 18, 85], fill=(205, 160, 130))
+    d.polygon([(w // 2 - 45, 95), (w // 2 + 45, 95), (w // 2 + 75, h - 70), (w // 2 - 75, h - 70)],
+              fill=garment_rgb)
+    for x in range(w // 2 - 60, w // 2 + 60, 14):
+        for y in range(110, h - 80, 18):
+            d.ellipse([x, y, x + 4, y + 4], fill=(250, 240, 240))
+    return img
+
+
+@pytest.mark.parametrize("rgb,name", [((222, 48, 110), "pink"), ((30, 60, 180), "blue"),
+                                      ((240, 240, 236), "white"), ((25, 25, 30), "black")])
+def test_dominant_color_in_a_room_photo(rgb, name):
+    # Regression: a pink kurti against an off-white wall used to come out "white".
+    assert vision.dominant_color(room_photo(rgb)) == name

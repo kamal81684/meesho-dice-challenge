@@ -129,20 +129,28 @@ def _hue_to_color(h: float, s: float, v: float) -> str:
 
 
 def dominant_color(img: Image.Image) -> Optional[str]:
-    """Most common product colour, ignoring a plain white/grey background."""
-    small = img.copy()
-    small.thumbnail((96, 96))
-    hsv = np.asarray(small.convert("HSV"), dtype=np.float32) / 255.0
-    h, s, v = hsv[..., 0].ravel() * 360, hsv[..., 1].ravel(), hsv[..., 2].ravel()
-    background = (v > 0.85) & (s < 0.12)
-    keep = ~background
-    if keep.sum() < 0.05 * keep.size:      # nearly all background: a white product
-        return "white"
-    votes: dict[str, int] = {}
-    for hh, ss, vv in zip(h[keep], s[keep], v[keep]):
-        c = _hue_to_color(hh, ss, vv)
-        votes[c] = votes.get(c, 0) + 1
-    return max(votes, key=votes.get) if votes else None
+    """Main product colour.
+
+    Product photos put the product near the centre, often against a room or
+    wall rather than a pure white sweep. So: look at the central region, and
+    vote among clearly coloured pixels weighted by saturation x brightness,
+    which lets a pink kurti beat an off-white wall, a wooden table or skin.
+    Only when almost nothing is coloured is the product white, grey or black.
+    """
+    w, h = img.size
+    crop = img.crop((int(w * 0.2), int(h * 0.1), int(w * 0.8), int(h * 0.95)))
+    crop.thumbnail((128, 128))
+    hsv = np.asarray(crop.convert("HSV"), dtype=np.float32) / 255.0
+    hh, ss, vv = hsv[..., 0].ravel() * 360, hsv[..., 1].ravel(), hsv[..., 2].ravel()
+    chromatic = (ss >= 0.25) & (vv >= 0.25)
+    if chromatic.mean() >= 0.06:
+        votes: dict[str, float] = {}
+        for a, b, c in zip(hh[chromatic], ss[chromatic], vv[chromatic]):
+            name = _hue_to_color(a, b, c)
+            votes[name] = votes.get(name, 0.0) + float(b * c)
+        return max(votes, key=votes.get)
+    # Neutral product: black if a sizeable dark area sits in the centre.
+    return "black" if float((vv < 0.25).mean()) >= 0.15 else "white"
 
 
 def photo_checks(p: Photo) -> dict:
