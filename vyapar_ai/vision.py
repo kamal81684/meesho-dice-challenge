@@ -618,12 +618,10 @@ def analyze_photos(photos: list[Photo], extractor: Optional[VisionExtractor] = N
             ". Din ki roshni mein, saaf background par dobara photo lein; "
             "achhi photo se returns kam hote hain."),
             "actions": [{"id": "dismiss", "label": "Theek hai"}]})
-    if len(photos) < 5 or missing:
-        want = [SHOT_TEXT[m] for m in missing if m in SHOT_TEXT]
-        extra = f" Yeh photos nahi dikh rahi: {', '.join(want)}." if want else ""
+    # During testing, one photo is enough; do not request additional angles.
+    if len(photos) < 1:
         nudges.append({"type": "photo_shots", "text": (
-            f"Aapne {len(photos)} photo daali hain.{extra} Kam se kam 5 photos "
-            "(saamne, peeche, close-up, pehne hue, size chart) se buyer ko bharosa milta hai."),
+            "Product ki kam se kam 1 saaf photo daalein."),
             "actions": [{"id": "dismiss", "label": "Theek hai"}]})
     if attrs and not suggested["is_product_photo"]:
         nudges.insert(0, {"type": "photo_quality", "text": (

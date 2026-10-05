@@ -84,7 +84,7 @@ def test_vlm_request_and_extraction():
     assert s["has_fabric_card"] is True and s["has_size_chart"] is False and s["image_count"] == 2
     assert report.backend == "vlm"
     assert "back" in report.missing_shots and "size_chart" in report.missing_shots
-    assert any(n["type"] == "photo_shots" for n in report.nudges)
+    assert not any(n["type"] == "photo_shots" for n in report.nudges)
 
 
 def test_vlm_output_is_sanitised():
