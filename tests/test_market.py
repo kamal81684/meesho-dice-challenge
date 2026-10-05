@@ -55,6 +55,10 @@ def test_risk_model_falls_back_when_lightgbm_cannot_load(monkeypatch, catalog):
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", broken)
+    # risk.py warns once per process, so reset the latch to keep this test
+    # independent of whatever ran before it.
+    import vyapar_ai.risk as risk_mod
+    monkeypatch.setattr(risk_mod, "_warned_fallback", False)
     with pytest.warns(UserWarning, match="LightGBM unavailable"):
         model = RiskModel()
     assert isinstance(model.ret_model, HistGradientBoostingRegressor)
