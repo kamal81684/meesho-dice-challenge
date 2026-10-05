@@ -62,6 +62,7 @@ class Day0Result:
     levers: list[dict] = field(default_factory=list)
     nudges: list[dict] = field(default_factory=list)
     decisions: dict = field(default_factory=dict)
+    explanation: str = ""
 
     def to_dict(self) -> dict:
         return self.__dict__.copy()
@@ -112,7 +113,7 @@ class PricingEngine:
                                     rec.expected_unit_margin, r_ret)]
         cards += [nudges.lever_card(l, p.subcategory.replace("_", " ")) for l in levers[:2]]
 
-        return Day0Result(
+        result = Day0Result(
             recommendation=rec.to_dict(),
             market=snap.to_dict(),
             risk={"predicted_return_rate": round(r_ret, 4),
@@ -139,3 +140,6 @@ class PricingEngine:
             nudges=cards,
             decisions=bundle.to_dict(),
         )
+        result.explanation = nudges.explain_text(result.cost_breakdown, result.recommendation,
+                                                 result.risk)
+        return result

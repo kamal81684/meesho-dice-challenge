@@ -65,6 +65,9 @@ python scripts/backtest.py
 | `POST` | `/api/day0` | Floor P₀, launch price, competitor band, risk, levers, nudges |
 | `POST` | `/api/lifecycle` | Stage detection (launch/scale/defense/salvage), price action, bundles, competitor alert |
 | `GET` | `/api/subcategories` | Supported taxonomy |
+| `POST` | `/api/price-check` | Margin and verdict (loss / below target / ok / overpriced) for a seller's own price |
+| `POST` | `/api/listings` | List the product at a price (in-memory store in the MVP) |
+| `GET` | `/api/listings` | Listings created so far |
 
 Interactive docs: `http://127.0.0.1:8000/docs`.
 

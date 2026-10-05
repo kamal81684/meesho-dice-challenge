@@ -95,12 +95,70 @@ def subcategories():
     return {cat: list(subs) for cat, subs in TAXONOMY.items()}
 
 
-@app.post("/api/day0")
-def day0(req: Day0Request):
+def _run_day0(req: Day0Request) -> dict:
     valid = {s for subs in TAXONOMY.values() for s in subs}
     if req.subcategory not in valid:
         raise HTTPException(422, f"subcategory must be one of {sorted(valid)}")
     return engine().day0(SellerProduct(**req.model_dump())).to_dict()
+
+
+@app.post("/api/day0")
+def day0(req: Day0Request):
+    return _run_day0(req)
+
+
+class PriceRequest(BaseModel):
+    product: Day0Request
+    price: int = Field(gt=0)
+
+
+def evaluate_price(d: dict, price: int) -> dict:
+    """Margin and verdict for a seller-chosen price, using the Day-0 cost model."""
+    c, rec, band_high = d["cost_breakdown"], d["recommendation"], d["market"]["band_high"]
+    fixed = c["cogs"] + c["labor"] + c["packaging"] + c.get("platform_fees", 0)
+    margin = (price * (1 - c["tax_rate"]) - fixed
+              - c["expected_rto_cost"] - c["expected_return_cost"])
+    if price < rec["break_even"]:
+        verdict = "loss"
+    elif price < rec["floor_price"]:
+        verdict = "below_target"
+    elif price > band_high:
+        verdict = "overpriced"
+    else:
+        verdict = "ok"
+    return {"price": price, "verdict": verdict, "unit_margin": round(margin, 2),
+            "card": nudges.price_check_card(price, verdict, margin, rec["floor_price"],
+                                            rec["break_even"], band_high,
+                                            rec["recommended_price"])}
+
+
+@app.post("/api/price-check")
+def price_check(req: PriceRequest):
+    return evaluate_price(_run_day0(req.product), req.price)
+
+
+# In-memory store for the MVP; a real deployment writes to the catalog service.
+LISTINGS: list[dict] = []
+
+
+@app.post("/api/listings", status_code=201)
+def create_listing(req: PriceRequest):
+    check = evaluate_price(_run_day0(req.product), req.price)
+    listing = {"listing_id": f"VY{len(LISTINGS) + 1:05d}", "title": req.product.title,
+               "subcategory": req.product.subcategory, "price": req.price,
+               "verdict": check["verdict"], "unit_margin": check["unit_margin"]}
+    LISTINGS.append(listing)
+    msg = (f"Ho gaya! '{req.product.title}' {nudges.rs(req.price)} par list ho gaya "
+           f"(ID {listing['listing_id']}). Har order par lagbhag "
+           f"{nudges.rs(check['unit_margin'])} munafa.")
+    if check["verdict"] == "loss":
+        msg += " Dhyaan dein: is daam par har order par nuksaan hoga."
+    return {"listing": listing, "message": msg}
+
+
+@app.get("/api/listings")
+def list_listings():
+    return {"listings": LISTINGS}
 
 
 @app.post("/api/lifecycle")

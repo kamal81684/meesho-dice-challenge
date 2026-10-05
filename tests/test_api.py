@@ -34,3 +34,38 @@ def test_lifecycle_endpoint_defense_with_competitor_alert():
     assert r.status_code == 200 and d["stage"] == "defense"
     assert d["bundles"] and any(n["type"] == "competitor_alert" for n in d["nudges"])
     assert d["suggested_price"] >= d["floor_p0"]
+
+
+KURTI = {"title": "Pink printed cotton kurti", "subcategory": "kurti", "cogs": 150,
+         "labor": 20, "packaging": 10, "target_profit": 40, "seller_name": "Ramesh"}
+
+
+def test_nudge_actions_are_structured():
+    d = client.post("/api/day0", json=KURTI).json()
+    acts = d["nudges"][0]["actions"]
+    assert [a["id"] for a in acts] == ["accept_price", "keep_price", "explain"]
+    assert acts[0]["price"] == d["recommendation"]["recommended_price"]
+    assert d["explanation"].startswith("Hisaab aise bana")
+
+
+def test_price_check_verdicts():
+    d = client.post("/api/day0", json=KURTI).json()
+    rec = d["recommendation"]
+    def verdict(p):
+        return client.post("/api/price-check", json={"product": KURTI, "price": p}).json()
+    assert verdict(int(rec["break_even"]) - 20)["verdict"] == "loss"
+    assert verdict(int(rec["break_even"]) - 20)["unit_margin"] < 0
+    assert verdict(int(rec["floor_price"]) - 2)["verdict"] == "below_target"
+    ok = verdict(rec["recommended_price"])
+    assert ok["verdict"] == "ok"
+    assert abs(ok["unit_margin"] - rec["expected_unit_margin"]) < 0.01
+    assert verdict(int(d["market"]["band_high"]) + 50)["verdict"] == "overpriced"
+
+
+def test_create_and_list_listing():
+    r = client.post("/api/listings", json={"product": KURTI, "price": 289})
+    assert r.status_code == 201
+    body = r.json()
+    assert body["listing"]["price"] == 289 and body["message"].startswith("Ho gaya!")
+    ids = [l["listing_id"] for l in client.get("/api/listings").json()["listings"]]
+    assert body["listing"]["listing_id"] in ids
