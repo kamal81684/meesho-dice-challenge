@@ -252,8 +252,8 @@ button { cursor: pointer; }
         <span>Vyapar<span>-AI</span></span>
       </a>
       <div class="header-actions">
-        <button class="language" id="langBtn" type="button" aria-label="Switch language">EN<svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></button>
-        <button class="help-button" type="button"><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 0 1 4.6 1c0 2-2.4 2.2-2.4 4"/><path d="M12 18h.01"/></svg>Help</button>
+        <button class="language" id="langBtn" type="button" data-i18n-attr="aria-label:langAria"><span id="langCode">EN</span><svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></button>
+        <button class="help-button" type="button"><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 0 1 4.6 1c0 2-2.4 2.2-2.4 4"/><path d="M12 18h.01"/></svg><span data-i18n="help">Help</span></button>
         <div class="avatar" aria-label="Ramesh account">R</div>
       </div>
     </div>
@@ -262,113 +262,113 @@ button { cursor: pointer; }
   <main class="page">
     <section class="welcome">
       <div>
-        <span class="kicker"><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/></svg>Smart pricing for your business</span>
-        <h1>Price your product with confidence</h1>
-        <p>Add your product cost. We&apos;ll suggest a profitable price and help reduce returns.</p>
+        <span class="kicker"><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/></svg><span data-i18n="kicker">Smart pricing for your business</span></span>
+        <h1 data-i18n="heroTitle">Price your product with confidence</h1>
+        <p data-i18n="heroSub">Add your product cost. We&apos;ll suggest a profitable price and help reduce returns.</p>
       </div>
-      <div class="trust-note"><span class="trust-icon"><svg aria-hidden="true" class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span><strong>No hidden commission</strong><small>Your price always covers your costs</small></span></div>
+      <div class="trust-note"><span class="trust-icon"><svg aria-hidden="true" class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span><strong data-i18n="trustTitle">No hidden commission</strong><small data-i18n="trustSub">Your price always covers your costs</small></span></div>
     </section>
 
     <nav class="steps" aria-label="Pricing steps">
-      <div class="step active"><span>1</span><div><strong>Product details</strong><small>About 2 minutes</small></div></div>
+      <div class="step active"><span>1</span><div><strong data-i18n="step1Title">Product details</strong><small data-i18n="step1Sub">About 2 minutes</small></div></div>
       <div class="step-line"></div>
-      <div class="step current"><span>2</span><div><strong>Your best price</strong><small id="step2sub">Ready to review</small></div></div>
+      <div class="step current"><span>2</span><div><strong data-i18n="step2Title">Your best price</strong><small id="step2sub">Ready to review</small></div></div>
       <div class="step-line"></div>
-      <div class="step"><span>3</span><div><strong>Improve sales</strong><small>Simple next steps</small></div></div>
+      <div class="step"><span>3</span><div><strong data-i18n="step3Title">Improve sales</strong><small data-i18n="step3Sub">Simple next steps</small></div></div>
     </nav>
 
     <div class="workspace">
       <div class="form-column">
         <section class="card product-card">
           <div class="card-title">
-            <div><span class="section-number">1</span><div><h2>Your product</h2><p id="productHint">We filled in what we could from your photo.</p></div></div>
-            <span class="saved"><svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>Saved</span>
+            <div><span class="section-number">1</span><div><h2 data-i18n="productCardTitle">Your product</h2><p id="productHint" data-i18n="productHint">We filled in what we could from your photo.</p></div></div>
+            <span class="saved"><svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg><span data-i18n="saved">Saved</span></span>
           </div>
 
           <div class="product-summary">
-            <div class="photo-crop" id="photoCrop" role="button" tabindex="0" aria-label="Add or change product photos">
+            <div class="photo-crop" id="photoCrop" role="button" tabindex="0" data-i18n-attr="aria-label:addPhotoAria">
               <img id="coverImg" alt="" hidden>
               <span class="ph-empty" id="phEmpty"><svg aria-hidden="true" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/></svg></span>
               <span class="photo-count" id="photoCount" hidden></span>
             </div>
             <div class="product-meta">
-              <span class="quality-badge" id="qualityBadge"><svg aria-hidden="true" class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>Add a photo to auto-fill</span>
+              <span class="quality-badge" id="qualityBadge"><svg aria-hidden="true" class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg><span id="qualityText">Add a photo to auto-fill</span></span>
               <h3 id="pmTitle">Pink printed cotton kurti</h3>
               <p id="pmAttrs">Kurti · Cotton · Printed</p>
-              <button class="text-button" id="changePhotoBtn" type="button"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/></svg>Add / change photo</button>
+              <button class="text-button" id="changePhotoBtn" type="button"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/></svg><span data-i18n="changePhoto">Add / change photo</span></button>
             </div>
           </div>
           <div class="detected" id="detected" hidden></div>
 
-          <div class="subheading"><h3>Product information</h3><span>Review and edit if needed</span></div>
+          <div class="subheading"><h3 data-i18n="prodInfo">Product information</h3><span data-i18n="reviewEdit">Review and edit if needed</span></div>
           <div class="field-grid">
-            <label class="field wide"><span>Product title</span><span class="input-wrap"><input id="title" value="Pink printed cotton kurti"></span></label>
-            <label class="field"><span>Category</span><span class="select-wrap"><select id="sub"><option value="kurti">kurti</option></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
-            <label class="field"><span>Colour</span><span class="select-wrap"><select id="color"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
-            <label class="field"><span>Fabric</span><span class="select-wrap"><select id="fabric"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
-            <label class="field"><span>Pattern</span><span class="select-wrap"><select id="pattern"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
-            <label class="field"><span>Weight</span><span class="input-wrap"><input id="weight_kg" type="number" step="0.01" min="0" value="0.35"><b>kg</b></span></label>
+            <label class="field wide"><span data-i18n="fTitle">Product title</span><span class="input-wrap"><input id="title" value="Pink printed cotton kurti"></span></label>
+            <label class="field"><span data-i18n="fCategory">Category</span><span class="select-wrap"><select id="sub"><option value="kurti">kurti</option></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span data-i18n="fColour">Colour</span><span class="select-wrap"><select id="color"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span data-i18n="fFabric">Fabric</span><span class="select-wrap"><select id="fabric"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span data-i18n="fPattern">Pattern</span><span class="select-wrap"><select id="pattern"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field"><span data-i18n="fWeight">Weight</span><span class="input-wrap"><input id="weight_kg" type="number" step="0.01" min="0" value="0.35"><b>kg</b></span></label>
           </div>
         </section>
 
         <section class="card costs-card">
-          <div class="card-title compact"><div><span class="section-number">2</span><div><h2>Your costs &amp; profit</h2><p>Enter cost for one product.</p></div></div></div>
-          <div class="cost-callout"><svg aria-hidden="true" class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7h.01"/></svg><span>Use your actual costs. We&apos;ll include return risk and taxes automatically.</span></div>
+          <div class="card-title compact"><div><span class="section-number">2</span><div><h2 data-i18n="costsTitle">Your costs &amp; profit</h2><p data-i18n="costsSub">Enter cost for one product.</p></div></div></div>
+          <div class="cost-callout"><svg aria-hidden="true" class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7h.01"/></svg><span data-i18n="costCallout">Use your actual costs. We&apos;ll include return risk and taxes automatically.</span></div>
           <div class="field-grid costs">
-            <label class="field"><span>Product / fabric cost</span><span class="input-wrap"><input id="cogs" type="number" min="0" value="150"><b>₹</b></span></label>
-            <label class="field"><span>Labour &amp; stitching</span><span class="input-wrap"><input id="labor" type="number" min="0" value="20"><b>₹</b></span></label>
-            <label class="field"><span>Packaging</span><span class="input-wrap"><input id="packaging" type="number" min="0" value="10"><b>₹</b></span></label>
-            <label class="field"><span>Profit you want per order</span><span class="input-wrap"><input id="target_profit" type="number" min="0" value="40"><b>₹</b></span></label>
+            <label class="field"><span data-i18n="fProductCost">Product / fabric cost</span><span class="input-wrap"><input id="cogs" type="number" min="0" value="150"><b>₹</b></span></label>
+            <label class="field"><span data-i18n="fLabour">Labour &amp; stitching</span><span class="input-wrap"><input id="labor" type="number" min="0" value="20"><b>₹</b></span></label>
+            <label class="field"><span data-i18n="fPackaging">Packaging</span><span class="input-wrap"><input id="packaging" type="number" min="0" value="10"><b>₹</b></span></label>
+            <label class="field"><span data-i18n="fProfit">Profit you want per order</span><span class="input-wrap"><input id="target_profit" type="number" min="0" value="40"><b>₹</b></span></label>
           </div>
-          <div class="cost-total"><span>Your total product cost</span><strong id="costTotal">₹180</strong></div>
-          <button class="primary-button" id="calcBtn" type="button">Show my best price <svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button>
-          <p class="safe-note"><svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>We will never suggest a price below your break-even point.</p>
+          <div class="cost-total"><span data-i18n="totalCost">Your total product cost</span><strong id="costTotal">₹180</strong></div>
+          <button class="primary-button" id="calcBtn" type="button"><span id="calcLabel" data-i18n="showPrice">Show my best price</span><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button>
+          <p class="safe-note"><svg aria-hidden="true" class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg><span data-i18n="safeNote">We will never suggest a price below your break-even point.</span></p>
         </section>
       </div>
 
       <aside class="results-column">
         <section class="recommendation" id="recommendation">
           <div class="result-top">
-            <span class="result-label"><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/></svg>Recommended launch price</span>
-            <span class="confidence" id="confidenceTag">Best match</span>
+            <span class="result-label"><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18 14 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z"/></svg><span data-i18n="recommended">Recommended launch price</span></span>
+            <span class="confidence" id="confidenceTag" data-i18n="bestMatch">Best match</span>
           </div>
           <div class="price-row"><div><span class="rupee">₹</span><strong id="bigPrice">289</strong></div><span class="profit-pill" id="profitPill">+₹51 profit / order</span></div>
           <p class="price-explainer" id="priceExplainer">Competitive for buyers and safely above your costs.</p>
           <div class="market-summary">
-            <div><span>Similar products sell for</span><strong id="band">₹269 – ₹320</strong></div>
-            <div><span>Expected return risk</span><strong id="riskVal">34%</strong></div>
+            <div><span data-i18n="similarSell">Similar products sell for</span><strong id="band">₹269 – ₹320</strong></div>
+            <div><span data-i18n="returnRisk">Expected return risk</span><strong id="riskVal">34%</strong></div>
           </div>
           <div class="price-control">
-            <div class="control-head"><div><h3>Try another price</h3><p>See how it changes your profit.</p></div><output id="priceOut">₹289</output></div>
-            <input class="range" id="range" type="range" min="234" max="320" step="1" value="289" aria-label="Listing price in rupees">
-            <div class="range-labels"><span><b id="lblBe">₹234</b>Break-even</span><span><b id="lblFloor">₹277</b>Safe price</span><span><b id="lblTop">₹320</b>Market top</span></div>
-            <div class="price-status" id="priceStatus"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>Good balance</div>
+            <div class="control-head"><div><h3 data-i18n="tryPrice">Try another price</h3><p data-i18n="tryPriceSub">See how it changes your profit.</p></div><output id="priceOut">₹289</output></div>
+            <input class="range" id="range" type="range" min="234" max="320" step="1" value="289" data-i18n-attr="aria-label:rangeAria">
+            <div class="range-labels"><span><b id="lblBe">₹234</b><span data-i18n="lblBreakeven">Break-even</span></span><span><b id="lblFloor">₹277</b><span data-i18n="lblSafe">Safe price</span></span><span><b id="lblTop">₹320</b><span data-i18n="lblMarketTop">Market top</span></span></div>
+            <div class="price-status" id="priceStatus"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg><span id="priceStatusText">Good balance</span></div>
           </div>
           <details class="breakdown">
-            <summary><span id="breakdownTitle">How we calculated ₹289</span><span>View details <svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></summary>
-            <div class="breakdown-grid"><span>Product costs</span><b id="bCosts">₹180</b><span>Return &amp; delivery risk</span><b id="bRisk">₹38</b><span>Taxes</span><b id="bTax">₹20</b><span>Your profit</span><b class="positive" id="bProfit">₹51</b></div>
+            <summary><span id="breakdownTitle">How we calculated ₹289</span><span><span data-i18n="viewDetails">View details</span> <svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></summary>
+            <div class="breakdown-grid"><span data-i18n="bCosts">Product costs</span><b id="bCosts">₹180</b><span data-i18n="bRisk">Return &amp; delivery risk</span><b id="bRisk">₹38</b><span data-i18n="bTax">Taxes</span><b id="bTax">₹20</b><span data-i18n="bProfit">Your profit</span><b class="positive" id="bProfit">₹51</b></div>
           </details>
           <button class="list-button" id="listBtn" type="button">Use ₹289 as my price <svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button>
-          <button class="secondary-button" id="saveBtn" type="button">Save and finish later</button>
+          <button class="secondary-button" id="saveBtn" type="button" data-i18n="saveLater">Save and finish later</button>
         </section>
 
         <section class="card improve-card">
-          <div class="improve-heading"><div><span class="section-number">3</span><div><h2>Reduce returns, earn more</h2><p>Complete these before listing.</p></div></div><span class="task-count" id="taskCount">0/3 done</span></div>
-          <label class="action-item" id="actSize"><input type="checkbox" id="has_size_chart"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong>Add a size chart</strong><small id="sizeCopy">Could reduce returns by 8%</small></span><span class="impact" id="sizeImpact">High impact</span></label>
-          <label class="action-item" id="actFabric"><input type="checkbox" id="has_fabric_card"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong>Add fabric &amp; GSM details</strong><small id="fabricCopy">Helps buyers know what to expect</small></span><span class="impact" id="fabricImpact">5% fewer returns</span></label>
-          <label class="action-item" id="actPhotos"><input type="checkbox" id="more_photos"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong>Add 3 more product photos</strong><small id="photosCopy">Show the back, fabric and close-up</small></span><span class="impact" id="photosImpact">More buyer trust</span></label>
+          <div class="improve-heading"><div><span class="section-number">3</span><div><h2 data-i18n="improveTitle">Reduce returns, earn more</h2><p data-i18n="improveSub">Complete these before listing.</p></div></div><span class="task-count" id="taskCount">0/3 done</span></div>
+          <label class="action-item" id="actSize"><input type="checkbox" id="has_size_chart"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong data-i18n="actSize">Add a size chart</strong><small id="sizeCopy">Could reduce returns by 8%</small></span><span class="impact" id="sizeImpact" data-i18n="actSizeImpact">High impact</span></label>
+          <label class="action-item" id="actFabric"><input type="checkbox" id="has_fabric_card"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong data-i18n="actFabric">Add fabric &amp; GSM details</strong><small id="fabricCopy">Helps buyers know what to expect</small></span><span class="impact" id="fabricImpact" data-i18n="actFabricImpact">5% fewer returns</span></label>
+          <label class="action-item" id="actPhotos"><input type="checkbox" id="more_photos"><span class="custom-check"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="action-copy"><strong data-i18n="actPhotos">Add 3 more product photos</strong><small id="photosCopy">Show the back, fabric and close-up</small></span><span class="impact" id="photosImpact" data-i18n="actPhotosImpact">More buyer trust</span></label>
         </section>
 
         <section class="whatsapp-card">
-          <div class="whatsapp-head"><span><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.5L3 20.5l1.3-4.7A8.5 8.5 0 1 1 20.5 11.7Z"/><path d="M8.5 8.2c.3 2.9 2.5 5 5.3 5.5"/></svg>Vyapar-AI on WhatsApp</span><b>Preview</b></div>
+          <div class="whatsapp-head"><span><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.5L3 20.5l1.3-4.7A8.5 8.5 0 1 1 20.5 11.7Z"/><path d="M8.5 8.2c.3 2.9 2.5 5 5.3 5.5"/></svg>Vyapar-AI on WhatsApp</span><b data-i18n="waPreview">Preview</b></div>
           <div class="message" id="waMsg">Add a simple size chart so buyers pick the right size — it can cut size-related returns.<small>10:42 AM <svg aria-hidden="true" class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></small></div>
-          <p>We&apos;ll send simple reminders in the language you choose.</p>
+          <p data-i18n="waNote">We&apos;ll send simple reminders in the language you choose.</p>
         </section>
       </aside>
     </div>
   </main>
 
-  <div class="mobile-action"><div><span>Your best price</span><strong id="mobPrice">₹289</strong></div><button id="mobBtn" type="button">Review price <svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button></div>
+  <div class="mobile-action"><div><span data-i18n="yourBestPrice">Your best price</span><strong id="mobPrice">₹289</strong></div><button id="mobBtn" type="button"><span data-i18n="reviewPrice">Review price</span><svg aria-hidden="true" class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></svg></button></div>
 </div>
 
 <script>
@@ -390,11 +390,122 @@ button { cursor: pointer; }
   var svg = function (n, s) { s = s || 18; return '<svg aria-hidden="true" class="icon" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + PATHS[n] + '</svg>'; };
   var ICO = { arrow: svg("arrow"), check: svg("check"), info: svg("info", 15) };
 
+  /* ---------------- i18n ---------------- */
+  var I18N = {
+    en: {
+      help: "Help", langAria: "Switch language (English / Hindi)",
+      kicker: "Smart pricing for your business",
+      heroTitle: "Price your product with confidence",
+      heroSub: "Add your product cost. We'll suggest a profitable price and help reduce returns.",
+      trustTitle: "No hidden commission", trustSub: "Your price always covers your costs",
+      step1Title: "Product details", step1Sub: "About 2 minutes",
+      step2Title: "Your best price", step2SubReady: "Ready to review", recommendedShort: "recommended",
+      step3Title: "Improve sales", step3Sub: "Simple next steps",
+      productCardTitle: "Your product", productHint: "We filled in what we could from your photo.",
+      productHintReading: "Reading your photos…", saved: "Saved",
+      badgeNoPhoto: "Add a photo to auto-fill", badgeGood: "Photo looks good",
+      badgeRetake1: "1 photo needs a retake", badgeRetakeN: "{n} photos need a retake",
+      changePhoto: "Add / change photo", addPhotoAria: "Add or change product photos",
+      prodInfo: "Product information", reviewEdit: "Review and edit if needed",
+      fTitle: "Product title", fCategory: "Category", fColour: "Colour", fFabric: "Fabric", fPattern: "Pattern", fWeight: "Weight",
+      costsTitle: "Your costs & profit", costsSub: "Enter cost for one product.",
+      costCallout: "Use your actual costs. We'll include return risk and taxes automatically.",
+      fProductCost: "Product / fabric cost", fLabour: "Labour & stitching", fPackaging: "Packaging", fProfit: "Profit you want per order",
+      totalCost: "Your total product cost", showPrice: "Show my best price", calculating: "Calculating your safe price…",
+      safeNote: "We will never suggest a price below your break-even point.",
+      recommended: "Recommended launch price", bestMatch: "Best match", estimated: "Estimated",
+      profitPerOrder: "{amt} profit / order",
+      explainerOk: "Competitive for buyers and safely above your costs.",
+      explainerHigh: "Above the market band — buyers may compare on price.",
+      similarSell: "Similar products sell for", returnRisk: "Expected return risk",
+      tryPrice: "Try another price", tryPriceSub: "See how it changes your profit.",
+      lblBreakeven: "Break-even", lblSafe: "Safe price", lblMarketTop: "Market top", rangeAria: "Listing price in rupees",
+      verdictGood: "Good balance", verdictBelowSafe: "Below your safe price",
+      verdictLoss: "Below break-even — you would lose money", verdictHigh: "Higher price, slower sales",
+      howCalc: "How we calculated {amt}", viewDetails: "View details",
+      bCosts: "Product costs", bRisk: "Return & delivery risk", bTax: "Taxes", bProfit: "Your profit",
+      usePrice: "Use {amt} as my price", saveLater: "Save and finish later",
+      improveTitle: "Reduce returns, earn more", improveSub: "Complete these before listing.",
+      tasksDone: "{n}/3 done",
+      actSize: "Add a size chart", actSizeCopy: "Could reduce returns by 8%", actSizeImpact: "High impact",
+      actFabric: "Add fabric & GSM details", actFabricCopy: "Helps buyers know what to expect", actFabricImpact: "5% fewer returns",
+      actPhotos: "Add 3 more product photos", actPhotosCopy: "Show the back, fabric and close-up", actPhotosImpact: "More buyer trust",
+      reduceBy: "Could reduce returns by {n}%", done: "Done", addedToListing: "Added to your listing",
+      waPreview: "Preview", waNote: "We'll send simple reminders in the language you choose.",
+      yourBestPrice: "Your best price", reviewPrice: "Review price",
+      detectedFrom: "Detected from {n} photos", detectedFrom1: "Detected from 1 photo",
+      visionModel: "vision model", photoChecks: "photo checks", nothingYet: "nothing yet",
+      needRetake: "{n} photos need a retake", needRetake1: "1 photo needs a retake", filledIn: "filled in: {list}",
+      tOnlyImages: "Only JPEG, PNG or WebP photos can be added.", tTooMany: "Up to 8 photos at a time.",
+      tPhotoFail: "Photo analysis failed. ", tSaved: "Saved. You can finish this listing later.",
+      tListed: "Listed!", tListFail: "Couldn't list: ", tPriceFail: "Couldn't reach the pricing service. ",
+      waNudgeSize: "Add a simple size chart so buyers pick the right size — it can cut size-related returns.",
+      waNudgeFabric: "Add a fabric & GSM card so buyers know exactly what to expect.",
+      waNudgePhotos: "Add a few more photos (back, fabric, close-up) to build buyer trust.",
+      waNudgeDefault: "Keep your price above the safe floor and add a size chart to reduce returns."
+    },
+    hi: {
+      help: "मदद", langAria: "भाषा बदलें (अंग्रेज़ी / हिंदी)",
+      kicker: "आपके व्यापार के लिए स्मार्ट प्राइसिंग",
+      heroTitle: "भरोसे के साथ अपने प्रोडक्ट का दाम तय करें",
+      heroSub: "अपने प्रोडक्ट की लागत डालें। हम मुनाफ़े वाला दाम सुझाएंगे और रिटर्न कम करने में मदद करेंगे।",
+      trustTitle: "कोई छिपा कमीशन नहीं", trustSub: "आपका दाम हमेशा आपकी लागत से ऊपर रहेगा",
+      step1Title: "प्रोडक्ट की जानकारी", step1Sub: "लगभग 2 मिनट",
+      step2Title: "आपका सबसे अच्छा दाम", step2SubReady: "देखने के लिए तैयार", recommendedShort: "सुझाया गया",
+      step3Title: "बिक्री बढ़ाएँ", step3Sub: "आसान अगले कदम",
+      productCardTitle: "आपका प्रोडक्ट", productHint: "फ़ोटो से जो जानकारी मिली, वह भर दी है।",
+      productHintReading: "आपकी फ़ोटो पढ़ रहे हैं…", saved: "सेव हो गया",
+      badgeNoPhoto: "ऑटो-भरने के लिए फ़ोटो डालें", badgeGood: "फ़ोटो ठीक है",
+      badgeRetake1: "1 फ़ोटो दोबारा लेनी है", badgeRetakeN: "{n} फ़ोटो दोबारा लेनी हैं",
+      changePhoto: "फ़ोटो जोड़ें / बदलें", addPhotoAria: "प्रोडक्ट की फ़ोटो जोड़ें या बदलें",
+      prodInfo: "प्रोडक्ट की जानकारी", reviewEdit: "देखें और ज़रूरत हो तो बदलें",
+      fTitle: "प्रोडक्ट का नाम", fCategory: "श्रेणी", fColour: "रंग", fFabric: "कपड़ा", fPattern: "डिज़ाइन", fWeight: "वज़न",
+      costsTitle: "आपकी लागत और मुनाफ़ा", costsSub: "एक प्रोडक्ट की लागत डालें।",
+      costCallout: "अपनी असली लागत डालें। रिटर्न का जोखिम और टैक्स हम खुद जोड़ देंगे।",
+      fProductCost: "प्रोडक्ट / कपड़े की लागत", fLabour: "मज़दूरी और सिलाई", fPackaging: "पैकेजिंग", fProfit: "हर ऑर्डर पर चाहिए मुनाफ़ा",
+      totalCost: "आपकी कुल लागत", showPrice: "मेरा सबसे अच्छा दाम दिखाएँ", calculating: "आपका सुरक्षित दाम निकाल रहे हैं…",
+      safeNote: "हम कभी भी आपके लागत-बिंदु से नीचे दाम नहीं सुझाएंगे।",
+      recommended: "सुझाया गया शुरुआती दाम", bestMatch: "सबसे सही", estimated: "अनुमानित",
+      profitPerOrder: "हर ऑर्डर पर {amt} मुनाफ़ा",
+      explainerOk: "खरीदारों के लिए ठीक और आपकी लागत से सुरक्षित ऊपर।",
+      explainerHigh: "बाज़ार के दायरे से ऊपर — खरीदार दाम की तुलना कर सकते हैं।",
+      similarSell: "ऐसे प्रोडक्ट की कीमत", returnRisk: "अनुमानित रिटर्न जोखिम",
+      tryPrice: "दूसरा दाम आज़माएँ", tryPriceSub: "देखें मुनाफ़ा कैसे बदलता है।",
+      lblBreakeven: "लागत-बिंदु", lblSafe: "सुरक्षित दाम", lblMarketTop: "बाज़ार का ऊपरी दाम", rangeAria: "लिस्टिंग दाम रुपये में",
+      verdictGood: "अच्छा संतुलन", verdictBelowSafe: "आपके सुरक्षित दाम से नीचे",
+      verdictLoss: "लागत-बिंदु से नीचे — नुकसान होगा", verdictHigh: "ज़्यादा दाम, कम बिक्री",
+      howCalc: "{amt} कैसे निकाला", viewDetails: "पूरा हिसाब देखें",
+      bCosts: "प्रोडक्ट की लागत", bRisk: "रिटर्न और डिलीवरी जोखिम", bTax: "टैक्स", bProfit: "आपका मुनाफ़ा",
+      usePrice: "{amt} मेरा दाम रखें", saveLater: "सेव करें, बाद में पूरा करें",
+      improveTitle: "रिटर्न घटाएँ, कमाई बढ़ाएँ", improveSub: "लिस्ट करने से पहले ये पूरे करें।",
+      tasksDone: "{n}/3 पूरे",
+      actSize: "साइज़ चार्ट जोड़ें", actSizeCopy: "रिटर्न 8% तक घट सकते हैं", actSizeImpact: "बड़ा असर",
+      actFabric: "कपड़े और GSM की जानकारी जोड़ें", actFabricCopy: "खरीदार को सही अंदाज़ा मिलता है", actFabricImpact: "5% कम रिटर्न",
+      actPhotos: "3 और प्रोडक्ट फ़ोटो जोड़ें", actPhotosCopy: "पीछे, कपड़ा और क्लोज़-अप दिखाएँ", actPhotosImpact: "खरीदार का ज़्यादा भरोसा",
+      reduceBy: "रिटर्न {n}% तक घट सकते हैं", done: "हो गया", addedToListing: "लिस्टिंग में जुड़ गया",
+      waPreview: "झलक", waNote: "आपकी चुनी भाषा में आसान रिमाइंडर भेजेंगे।",
+      yourBestPrice: "आपका सबसे अच्छा दाम", reviewPrice: "दाम देखें",
+      detectedFrom: "{n} फ़ोटो से पहचाना", detectedFrom1: "1 फ़ोटो से पहचाना",
+      visionModel: "विज़न मॉडल", photoChecks: "फ़ोटो जाँच", nothingYet: "अभी कुछ नहीं",
+      needRetake: "{n} फ़ोटो दोबारा लेनी हैं", needRetake1: "1 फ़ोटो दोबारा लेनी है", filledIn: "भरा गया: {list}",
+      tOnlyImages: "सिर्फ़ JPEG, PNG या WebP फ़ोटो जोड़ सकते हैं।", tTooMany: "एक बार में 8 फ़ोटो तक।",
+      tPhotoFail: "फ़ोटो जाँच नहीं हो सकी। ", tSaved: "सेव हो गया। यह लिस्टिंग बाद में पूरी कर सकते हैं।",
+      tListed: "लिस्ट हो गया!", tListFail: "लिस्ट नहीं हो सका: ", tPriceFail: "प्राइसिंग सेवा से संपर्क नहीं हो सका। ",
+      waNudgeSize: "रमेश जी, एक आसान साइज़ चार्ट जोड़ें। इससे खरीदार सही साइज़ चुनेंगे और रिटर्न घटेंगे।",
+      waNudgeFabric: "कपड़े और GSM की जानकारी जोड़ें ताकि खरीदार को सही अंदाज़ा मिले।",
+      waNudgePhotos: "पीछे, कपड़ा और क्लोज़-अप की कुछ और फ़ोटो जोड़ें, इससे भरोसा बढ़ता है।",
+      waNudgeDefault: "अपना दाम सुरक्षित सीमा से ऊपर रखें और रिटर्न घटाने के लिए साइज़ चार्ट जोड़ें।"
+    }
+  };
+  var lang = (function () { try { var v = localStorage.getItem("vyaparLang"); return v === "hi" ? "hi" : "en"; } catch (e) { return "en"; } })();
+  function T(key) { var m = I18N[lang] || I18N.en; return (m[key] != null ? m[key] : (I18N.en[key] != null ? I18N.en[key] : key)); }
+  function TF(key, vars) { var s = T(key); Object.keys(vars || {}).forEach(function (k) { s = s.split("{" + k + "}").join(vars[k]); }); return s; }
+
   var FABRICS = ["cotton", "rayon", "silk", "polyester", "georgette", "linen"];
   var PATTERNS = ["printed", "solid", "embroidered", "woven", "striped", "floral"];
   var COLORS = ["pink", "red", "blue", "green", "yellow", "black", "white", "purple", "orange"];
 
-  var photos = [], lastBody = null, day0 = null, report = null, lang = "EN", debounce = null;
+  var photos = [], lastBody = null, day0 = null, report = null, debounce = null;
 
   function fill(sel, values) { sel.innerHTML = ""; values.forEach(function (v) { sel.appendChild(new Option(v, v)); }); }
   fill($("fabric"), FABRICS); fill($("pattern"), PATTERNS); fill($("color"), COLORS);
@@ -444,15 +555,16 @@ button { cursor: pointer; }
 
   function setLoading(on) {
     var b = $("calcBtn"); b.disabled = on;
-    b.innerHTML = on ? '<span class="spinner"></span>Calculating your safe price…' : "Show my best price " + ICO.arrow;
+    if (on) { b.innerHTML = '<span class="spinner"></span><span>' + esc(T("calculating")) + "</span>"; }
+    else { b.innerHTML = '<span id="calcLabel">' + esc(T("showPrice")) + "</span> " + ICO.arrow; }
   }
   function runDay0(spin, silent) {
     lastBody = currentBody();
     if (spin) setLoading(true);
     return api("/api/day0", lastBody).then(function (d) {
-      day0 = d; renderRecommendation(d); updateLeversFromApi(d); updateWhatsApp();
+      day0 = d; renderRecommendation(d); updateLeversCopy(d); updateWhatsApp();
     }).catch(function (e) {
-      if (!silent) toast("Couldn't reach the pricing service. " + e.message);
+      if (!silent) toast(T("tPriceFail") + e.message);
     }).then(function () { if (spin) setLoading(false); });
   }
 
@@ -461,10 +573,10 @@ button { cursor: pointer; }
     return p * (1 - c.tax_rate) - (c.cogs + c.labor + c.packaging + (c.platform_fees || 0)) - c.expected_rto_cost - c.expected_return_cost;
   }
   function verdictAt(p, d) {
-    if (p < d.recommendation.break_even) return { label: "Below break-even — you would lose money", warn: true };
-    if (p < d.recommendation.floor_price) return { label: "Below your safe price", warn: true };
-    if (p > d.market.band_high) return { label: "Higher price, slower sales", warn: true };
-    return { label: "Good balance", warn: false };
+    if (p < d.recommendation.break_even) return { label: T("verdictLoss"), warn: true };
+    if (p < d.recommendation.floor_price) return { label: T("verdictBelowSafe"), warn: true };
+    if (p > d.market.band_high) return { label: T("verdictHigh"), warn: true };
+    return { label: T("verdictGood"), warn: false };
   }
 
   function renderRecommendation(d) {
@@ -478,11 +590,9 @@ button { cursor: pointer; }
     $("band").textContent = rs(m.band_low) + " – " + rs(m.band_high);
     $("riskVal").textContent = pct(k.predicted_return_rate);
     $("riskVal").className = k.predicted_return_rate <= 0.25 ? "positive" : "";
-    $("confidenceTag").textContent = (m.level === "subcategory" && m.support >= 8) ? "Best match" : "Estimated";
-    $("priceExplainer").textContent = rec.position === "above_band"
-      ? "Above the market band — buyers may compare on price."
-      : "Competitive for buyers and safely above your costs.";
-    $("step2sub").textContent = rs(rec.recommended_price) + " recommended";
+    $("confidenceTag").textContent = (m.level === "subcategory" && m.support >= 8) ? T("bestMatch") : T("estimated");
+    $("priceExplainer").textContent = rec.position === "above_band" ? T("explainerHigh") : T("explainerOk");
+    $("step2sub").textContent = rs(rec.recommended_price) + " " + T("recommendedShort");
     updatePrice(Number(range.value));
   }
 
@@ -492,54 +602,58 @@ button { cursor: pointer; }
     $("bigPrice").textContent = Math.round(p);
     $("priceOut").textContent = rs(p);
     $("mobPrice").textContent = rs(p);
-    $("profitPill").textContent = (margin >= 0 ? "+" : "−") + rs(Math.abs(margin)) + " profit / order";
-    $("listBtn").innerHTML = "Use " + rs(p) + " as my price " + ICO.arrow;
-    $("breakdownTitle").textContent = "How we calculated " + rs(p);
+    $("profitPill").textContent = TF("profitPerOrder", { amt: (margin >= 0 ? "+" : "−") + rs(Math.abs(margin)) });
+    $("listBtn").innerHTML = esc(TF("usePrice", { amt: rs(p) })) + " " + ICO.arrow;
+    $("breakdownTitle").textContent = TF("howCalc", { amt: rs(p) });
     $("bCosts").textContent = rs(c.cogs + c.labor + c.packaging + (c.platform_fees || 0));
     $("bRisk").textContent = rs(c.expected_rto_cost + c.expected_return_cost);
     $("bTax").textContent = rs(p * c.tax_rate);
     $("bProfit").textContent = rsSigned(margin);
     var st = $("priceStatus");
     st.className = "price-status" + (v.warn ? " warning" : "");
-    st.innerHTML = (v.warn ? ICO.info : ICO.check) + esc(v.label);
+    st.innerHTML = (v.warn ? ICO.info : ICO.check) + '<span id="priceStatusText">' + esc(v.label) + "</span>";
     $("range").setAttribute("aria-valuetext", rs(p));
   }
 
-  var LEVER_EN = {
-    add_size_chart: "Add a simple size chart so buyers pick the right size — it can cut size-related returns.",
-    add_fabric_card: "Add a fabric & GSM card so buyers know exactly what to expect.",
-    more_photos: "Add a few more photos (back, fabric, close-up) to build buyer trust."
-  };
-  function updateLeversFromApi(d) {
-    var byId = {}; (d.levers || []).forEach(function (l) { byId[l.lever] = l; });
-    var set = function (lever, copyEl, defCopy) {
+  function updateLeversCopy(d) {
+    var byId = {}; (d && d.levers || []).forEach(function (l) { byId[l.lever] = l; });
+    var set = function (lever, copyEl, defKey) {
       var l = byId[lever];
-      copyEl.textContent = (l && l.relative_drop != null) ? "Could reduce returns by " + Math.round(l.relative_drop * 100) + "%" : defCopy;
+      copyEl.textContent = (l && l.relative_drop != null) ? TF("reduceBy", { n: Math.round(l.relative_drop * 100) }) : T(defKey);
     };
-    set("add_size_chart", $("sizeCopy"), "Could reduce returns by 8%");
-    set("add_fabric_card", $("fabricCopy"), "Helps buyers know what to expect");
-    set("more_photos", $("photosCopy"), "Show the back, fabric and close-up");
+    set("add_size_chart", $("sizeCopy"), "actSizeCopy");
+    set("add_fabric_card", $("fabricCopy"), "actFabricCopy");
+    set("more_photos", $("photosCopy"), "actPhotosCopy");
     updateTaskCount();
   }
   function updateTaskCount() {
     var applied = ["has_size_chart", "has_fabric_card", "more_photos"].filter(function (id) { return $(id).checked; }).length;
-    $("taskCount").textContent = applied + "/3 done";
+    $("taskCount").textContent = TF("tasksDone", { n: applied });
     [["has_size_chart", "actSize"], ["has_fabric_card", "actFabric"], ["more_photos", "actPhotos"]].forEach(function (pair) {
       $(pair[1]).classList.toggle("completed", $(pair[0]).checked);
     });
+    // copy for completed rows
+    var doneCopy = function (checked, el, defKey) { if (checked) el.textContent = T("addedToListing"); };
+    doneCopy($("has_size_chart").checked, $("sizeCopy"), "actSizeCopy");
+    doneCopy($("has_fabric_card").checked, $("fabricCopy"), "actFabricCopy");
+    doneCopy($("more_photos").checked, $("photosCopy"), "actPhotosCopy");
   }
 
-  function updateWhatsApp() {
-    var el = $("waMsg");
-    if (lang === "हि" && day0) {
+  function waKey() {
+    if (lang === "hi" && day0) {
       var n = (day0.nudges || []).filter(function (x) { return x.type === "lever_nudge"; })[0] || (day0.nudges || [])[0];
-      if (n) { el.textContent = n.text; tick(el); return; }
+      if (n && n.text) return n.text;
     }
     var key = day0 && day0.levers && day0.levers[0] ? day0.levers[0].lever : null;
-    el.textContent = LEVER_EN[key] || "Keep your price above the safe floor and add a size chart to reduce returns.";
-    tick(el);
+    return T(key === "add_size_chart" ? "waNudgeSize" : key === "add_fabric_card" ? "waNudgeFabric" : key === "more_photos" ? "waNudgePhotos" : "waNudgeDefault");
   }
-  function tick(el) { var s = document.createElement("small"); s.innerHTML = "10:42 AM " + svg("check", 12); el.appendChild(s); }
+  function updateWhatsApp() {
+    var el = $("waMsg");
+    el.textContent = waKey();
+    var s = document.createElement("small");
+    s.innerHTML = "10:42 AM " + svg("check", 12);
+    el.appendChild(s);
+  }
 
   function setCover() {
     var img = $("coverImg"), empty = $("phEmpty"), cnt = $("photoCount");
@@ -554,28 +668,28 @@ button { cursor: pointer; }
     }
   }
   function updateQuality() {
-    var badge = $("qualityBadge");
+    var badge = $("qualityBadge"), txt = $("qualityText");
     var bad = report && report.photos ? report.photos.filter(function (p) { return p.issues && p.issues.length; }).length : 0;
-    if (bad) { badge.className = "quality-badge warn"; badge.innerHTML = svg("info", 13) + (bad === 1 ? "1 photo needs a retake" : bad + " photos need a retake"); }
-    else { badge.className = "quality-badge"; badge.innerHTML = svg("check", 13) + (photos.length ? "Photo looks good" : "Add a photo to auto-fill"); }
+    if (bad) { badge.className = "quality-badge warn"; txt.textContent = bad === 1 ? T("badgeRetake1") : TF("badgeRetakeN", { n: bad }); }
+    else { badge.className = "quality-badge"; txt.textContent = photos.length ? T("badgeGood") : T("badgeNoPhoto"); }
   }
   function addPhotos(list) {
     var arr = [].slice.call(list), ok = arr.filter(function (f) { return /^image\/(jpeg|png|webp)$/.test(f.type); });
-    if (ok.length < arr.length) toast("Only JPEG, PNG or WebP photos can be added.");
+    if (ok.length < arr.length) toast(T("tOnlyImages"));
     ok.forEach(function (f) { if (!photos.some(function (g) { return g.name === f.name && g.size === f.size; })) photos.push(f); });
-    if (photos.length > 8) { photos = photos.slice(0, 8); toast("Up to 8 photos at a time."); }
+    if (photos.length > 8) { photos = photos.slice(0, 8); toast(T("tTooMany")); }
     setCover(); analyzePhotos();
   }
   function analyzePhotos() {
-    if (!photos.length) { report = null; updateQuality(); return; }
+    if (!photos.length) { report = null; updateQuality(); renderDetected(); return; }
     var fd = new FormData();
     photos.forEach(function (f) { fd.append("files", f); });
     fd.append("seller_name", "Ramesh");
-    $("productHint").textContent = "Reading your photos…";
+    $("productHint").textContent = T("productHintReading");
     fetch("/api/photos/analyze", { method: "POST", body: fd })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Photo analysis failed"); return d; }); })
       .then(function (d) { report = d; applyReport(d); })
-      .catch(function (e) { $("productHint").textContent = "We filled in what we could from your photo."; toast("Photo analysis failed. " + e.message); });
+      .catch(function (e) { $("productHint").textContent = T("productHint"); toast(T("tPhotoFail") + e.message); });
   }
   function applyReport(d) {
     var s = d.suggested || {};
@@ -587,26 +701,56 @@ button { cursor: pointer; }
       el.value = val; return true;
     };
     var filled = [];
-    if (setIf("sub", s.subcategory)) filled.push("category");
-    if (setIf("fabric", s.fabric)) filled.push("fabric");
-    if (setIf("pattern", s.pattern)) filled.push("pattern");
-    if (setIf("color", s.color)) filled.push("colour");
-    if (s.title && setIf("title", s.title)) filled.push("title");
-    if (s.has_size_chart && !$("has_size_chart").checked) { $("has_size_chart").checked = true; filled.push("size chart"); }
-    if (s.has_fabric_card && !$("has_fabric_card").checked) { $("has_fabric_card").checked = true; filled.push("fabric card"); }
+    if (setIf("sub", s.subcategory)) filled.push(T("fCategory"));
+    if (setIf("fabric", s.fabric)) filled.push(T("fFabric"));
+    if (setIf("pattern", s.pattern)) filled.push(T("fPattern"));
+    if (setIf("color", s.color)) filled.push(T("fColour"));
+    if (s.title && setIf("title", s.title)) filled.push(T("fTitle"));
+    if (s.has_size_chart && !$("has_size_chart").checked) { $("has_size_chart").checked = true; filled.push(T("actSize")); }
+    if (s.has_fabric_card && !$("has_fabric_card").checked) { $("has_fabric_card").checked = true; filled.push(T("actFabric")); }
     updateAttrs();
-    var n = d.photos ? d.photos.length : photos.length;
-    var chips = [s.subcategory && s.subcategory.replaceAll("_", " "), s.fabric, s.pattern, s.color].filter(Boolean);
-    var html = "<b>Detected from " + n + " photo" + (n > 1 ? "s" : "") + "</b>: " + (chips.length ? esc(chips.join(" · ")) : "nothing yet");
-    html += (d.backend && d.backend.indexOf("vlm") === 0) ? " · vision model" : " · photo checks";
-    var bad = (d.photos || []).filter(function (p) { return p.issues && p.issues.length; }).length;
-    if (bad) html += ' · <b>' + bad + " photo" + (bad > 1 ? "s" : "") + " need a retake</b>";
-    if (filled.length) html += " · filled in: " + esc(filled.join(", "));
-    var det = $("detected"); det.innerHTML = html; det.hidden = false;
+    _filled = filled;
+    renderDetected();
     updateQuality();
-    $("productHint").textContent = "We filled in what we could from your photo.";
+    $("productHint").textContent = T("productHint");
     updateTaskCount();
     runDay0(false, true);
+  }
+  var _filled = [];
+  function renderDetected() {
+    var det = $("detected");
+    if (!report) { det.hidden = true; det.innerHTML = ""; return; }
+    var d = report, s = d.suggested || {};
+    var n = d.photos ? d.photos.length : photos.length;
+    var chips = [s.subcategory && s.subcategory.replaceAll("_", " "), s.fabric, s.pattern, s.color].filter(Boolean);
+    var html = "<b>" + esc(n === 1 ? T("detectedFrom1") : TF("detectedFrom", { n: n })) + "</b>: " + (chips.length ? esc(chips.join(" · ")) : T("nothingYet"));
+    html += " · " + ((d.backend && d.backend.indexOf("vlm") === 0) ? T("visionModel") : T("photoChecks"));
+    var bad = (d.photos || []).filter(function (p) { return p.issues && p.issues.length; }).length;
+    if (bad) html += " · <b>" + esc(bad === 1 ? T("needRetake1") : TF("needRetake", { n: bad })) + "</b>";
+    if (_filled.length) html += " · " + esc(TF("filledIn", { list: _filled.join(", ") }));
+    det.innerHTML = html; det.hidden = false;
+  }
+
+  function applyI18n() {
+    document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = T(el.getAttribute("data-i18n")); });
+    document.querySelectorAll("[data-i18n-attr]").forEach(function (el) {
+      el.getAttribute("data-i18n-attr").split(";").forEach(function (pair) {
+        var p = pair.split(":"); if (p.length === 2) el.setAttribute(p[0].trim(), T(p[1].trim()));
+      });
+    });
+    $("langCode").textContent = lang === "hi" ? "हिं" : "EN";
+    document.documentElement.lang = lang === "hi" ? "hi" : "en";
+    // refresh JS-rendered text
+    updateAttrs(); updateCostTotal(); updateQuality(); renderDetected(); updateTaskCount();
+    if (day0) { updateLeversCopy(day0); renderRecommendation(day0); }
+    else { $("step2sub").textContent = T("step2SubReady"); }
+    updateWhatsApp();
+    if (!day0) { $("priceExplainer").textContent = T("explainerOk"); $("priceStatusText").textContent = T("verdictGood"); }
+  }
+  function setLang(next) {
+    lang = next;
+    try { localStorage.setItem("vyaparLang", lang); } catch (e) { /* ignore */ }
+    applyI18n();
   }
 
   function schedule() { clearTimeout(debounce); debounce = setTimeout(function () { runDay0(false, true); }, 700); }
@@ -623,20 +767,16 @@ button { cursor: pointer; }
   $("range").addEventListener("input", function (e) { updatePrice(Number(e.target.value)); });
   $("calcBtn").addEventListener("click", function () { runDay0(true, false); setTimeout(function () { var r = $("recommendation"); if (r && r.scrollIntoView) r.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); });
   $("mobBtn").addEventListener("click", function () { runDay0(true, false); var r = $("recommendation"); if (r && r.scrollIntoView) r.scrollIntoView({ behavior: "smooth", block: "start" }); });
-  $("saveBtn").addEventListener("click", function () { toast("Saved. You can finish this listing later."); });
+  $("saveBtn").addEventListener("click", function () { toast(T("tSaved")); });
   $("listBtn").addEventListener("click", function () {
     if (!lastBody) return;
     var p = Math.round(Number($("range").value));
     api("/api/listings", { product: lastBody, price: p }).then(function (res) {
-      toast(res.message || "Listed!");
-      $("listBtn").innerHTML = "Listed at " + rs(p) + " " + ICO.check;
-    }).catch(function (e) { toast("Couldn't list: " + e.message); });
+      toast(res.message || T("tListed"));
+      $("listBtn").innerHTML = esc(TF("usePrice", { amt: rs(p) })) + " " + ICO.check;
+    }).catch(function (e) { toast(T("tListFail") + e.message); });
   });
-  $("langBtn").addEventListener("click", function () {
-    lang = lang === "EN" ? "हि" : "EN";
-    $("langBtn").innerHTML = esc(lang) + svg("chevron", 14);
-    updateWhatsApp();
-  });
+  $("langBtn").addEventListener("click", function () { setLang(lang === "en" ? "hi" : "en"); });
   ["has_size_chart", "has_fabric_card", "more_photos"].forEach(function (id) {
     $(id).addEventListener("change", function () { updateTaskCount(); runDay0(false, true); });
   });
@@ -644,7 +784,8 @@ button { cursor: pointer; }
   ["cogs", "labor", "packaging", "target_profit"].forEach(function (id) { $(id).addEventListener("input", function () { updateCostTotal(); schedule(); }); });
 
   // ---- initial paint
-  updateCostTotal(); updateAttrs(); setCover(); updateQuality(); updateTaskCount();
+  applyI18n();
+  setCover();
   runDay0(false, true);
 })();
 </script>

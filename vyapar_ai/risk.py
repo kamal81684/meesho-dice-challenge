@@ -1,8 +1,11 @@
 """Risk & margin engine: predicts return and RTO probability (Slide 6, step 4).
 
 LightGBM when installed, otherwise scikit-learn's HistGradientBoosting.
-It also scores *levers*: how much adding a size chart, a fabric card or more
-photos would cut the predicted return rate. These drive the nudges.
+LightGBM is optional: if it is simply not installed we fall back quietly (no
+warning); if it is installed but its native library will not load we warn once
+so the broken install is visible. It also scores *levers*: how much adding a
+size chart, a fabric card or more photos would cut the predicted return rate.
+These drive the nudges.
 """
 from __future__ import annotations
 
@@ -15,6 +18,8 @@ from .catalog import TAXONOMY, Listing
 
 SUBS = [s for subs in TAXONOMY.values() for s in subs]
 APPAREL = {"women_ethnic", "men_fashion"}
+
+_warned_fallback = False        # emit the "broken install" warning at most once
 
 
 @dataclass
@@ -36,17 +41,25 @@ class RiskFeatures:
 
 
 def _make_regressor():
+    global _warned_fallback
     try:
         import lightgbm as lgb
         return lgb.LGBMRegressor(n_estimators=300, learning_rate=0.05, num_leaves=15,
                                  min_child_samples=20, verbose=-1)
-    except (ImportError, OSError) as e:
-        # OSError: LightGBM is installed but its native library cannot load,
-        # e.g. macOS without libomp (`brew install libomp`).
-        warnings.warn(f"LightGBM unavailable ({type(e).__name__}); "
-                      "using scikit-learn HistGradientBoosting instead.")
-        from sklearn.ensemble import HistGradientBoostingRegressor
-        return HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05)
+    except OSError as e:
+        # LightGBM is installed but its native library cannot load, e.g. macOS
+        # without libomp (`brew install libomp`). This is a real problem worth
+        # surfacing, so warn (once per process) and fall back.
+        if not _warned_fallback:
+            warnings.warn(f"LightGBM unavailable ({type(e).__name__}); "
+                          "using scikit-learn HistGradientBoosting instead.")
+            _warned_fallback = True
+    except ImportError:
+        # LightGBM is simply not installed. That is a supported setup (it is an
+        # optional dependency), so fall back quietly. Install `lightgbm` to use it.
+        pass
+    from sklearn.ensemble import HistGradientBoostingRegressor
+    return HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05)
 
 
 class RiskModel:
