@@ -242,6 +242,15 @@ PROMPT = (
 )
 
 
+_NO_TITLE = {"unknown", "none", "n/a", "na", "null", "not a product", "other", "-"}
+
+
+def _title(value) -> Optional[str]:
+    """A usable listing title, or None for empty/placeholder answers like "unknown"."""
+    t = str(value or "").strip().strip('"').strip()[:120]
+    return t if t and t.lower() not in _NO_TITLE else None
+
+
 def _clean(raw: dict) -> dict:
     """Keep only valid values; anything outside the allowed sets becomes None."""
     def pick(key, allowed):
@@ -260,7 +269,7 @@ def _clean(raw: dict) -> dict:
         "has_size_chart": raw.get("has_size_chart") is True,
         "has_fabric_label": raw.get("has_fabric_label") is True,
         "shots": [s for s in (raw.get("shots") or []) if s in SHOTS],
-        "suggested_title": str(raw.get("suggested_title") or "").strip()[:120] or None,
+        "suggested_title": _title(raw.get("suggested_title")),
         "confidence": max(0.0, min(1.0, conf)),
     }
 
@@ -590,6 +599,11 @@ def analyze_photos(photos: list[Photo], extractor: Optional[VisionExtractor] = N
     pixel_color = max(votes, key=votes.get) if votes else None
 
     a = attrs or {}
+    not_product = bool(attrs) and not a.get("is_product_photo", True)
+    if not_product:
+        # Nothing read from a non-product photo should end up in the listing form.
+        a = {"is_product_photo": False, "confidence": a.get("confidence")}
+        pixel_color = None
     shots = a.get("shots") or []
     suggested = {
         "image_count": len(photos),
@@ -604,8 +618,9 @@ def analyze_photos(photos: list[Photo], extractor: Optional[VisionExtractor] = N
         "is_product_photo": a.get("is_product_photo", True),
     }
     issues = sorted({i for c in checks for i in c["issues"]})
-    missing = [s for s in ("back", "close_up", "drape_or_worn") if attrs and s not in shots]
-    if attrs and not suggested["has_size_chart"]:
+    missing = [s for s in ("back", "close_up", "drape_or_worn")
+               if attrs and not not_product and s not in shots]
+    if attrs and not not_product and not suggested["has_size_chart"]:
         missing.append("size_chart")
 
     nudges = []
@@ -623,8 +638,8 @@ def analyze_photos(photos: list[Photo], extractor: Optional[VisionExtractor] = N
         nudges.append({"type": "photo_shots", "text": (
             "Product ki kam se kam 1 saaf photo daalein."),
             "actions": [{"id": "dismiss", "label": "Theek hai"}]})
-    if attrs and not suggested["is_product_photo"]:
-        nudges.insert(0, {"type": "photo_quality", "text": (
+    if not_product:
+        nudges.insert(0, {"type": "not_product", "text": (
             "Yeh photo product ki nahi lag rahi. Kripya product ki saaf photo daalein."),
             "actions": [{"id": "dismiss", "label": "Theek hai"}]})
 
