@@ -85,6 +85,7 @@ python scripts/backtest.py
 | `GET` | `/health` | Instant liveness check for load balancers (e.g. Render's health check path) |
 | `GET` | `/api/health` | Status, whether the models are built yet, and the active decision backend |
 | `GET` | `/api/subcategories` | Supported taxonomy |
+| `POST` | `/api/photos/analyze` | Upload up to 8 photos (multipart `files`): photo-quality checks plus vision-model extraction of category, fabric, pattern, colour, size chart and fabric label |
 | `POST` | `/api/price-check` | Margin and verdict (loss / below target / ok / overpriced) for a seller's own price |
 | `POST` | `/api/listings` | List the product at a price (in-memory store in the MVP) |
 | `GET` | `/api/listings` | Listings created so far |
@@ -131,6 +132,29 @@ With no key set, or if the API fails, a deterministic rules backend answers the
 same questions, so pricing never blocks. Jev never sets a price itself: the
 P ≥ P₀ and P ≤ Pmax guardrails stay in code. `GET /api/health` reports which
 backend is active.
+
+## Photo extraction (`vyapar_ai/vision.py`)
+
+Sellers can upload product photos in the form. The details are filled in automatically and the seller reviews them before pricing.
+
+| Layer | Runs | Gives |
+|---|---|---|
+| Photo checks (Pillow + numpy) | Always, no model needed | Resolution, brightness, blur, main colour, photo count |
+| Vision model | When `VISION_MODEL` and `VISION_API_KEY` are set | Sub-category, fabric, pattern, colour, size chart visible, fabric/GSM label visible, which shots exist, a suggested title |
+
+The vision model is called through an OpenAI-compatible `/chat/completions`
+endpoint, with images sent as `image_url` data URLs and a JSON schema for the
+answer. That fits Sarvam's API (`VISION_API_BASE=https://api.sarvam.ai/v1`) or
+a self-hosted model. The model's answer is checked against the allowed values,
+and anything unexpected is dropped. If the call fails, the photo checks still
+answer. Photo problems (blurry, dark, small) slightly raise the predicted return
+rate, and each one becomes a Hinglish tip in the chat.
+
+![Photo upload filling the form](docs/images/photo-upload.png)
+
+OCR is not needed. Attributes come from what the photo shows. Reading printed
+measurements on a size chart would be an OCR or document-model step, which
+could be added later.
 
 ## Architecture page
 

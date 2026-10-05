@@ -6,7 +6,7 @@ from typing import Optional
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,7 @@ from vyapar_ai.catalog import TAXONOMY
 from vyapar_ai.engine import PricingEngine, SellerProduct, forward_shipping
 from vyapar_ai.lifecycle import Signals, Stage, determine_stage, stage_action
 from vyapar_ai.pricing import CostInputs, break_even_price, floor_price, unit_margin
+from vyapar_ai import vision
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
@@ -52,6 +53,7 @@ class Day0Request(BaseModel):
     image_count: int = Field(3, ge=0)
     seller_name: str = "Seller"
     description: str = ""
+    photo_issues: int = Field(0, ge=0)  # number of photo-quality problems found by /api/photos/analyze
     return_comments: list[str] = Field(default_factory=list)
     c_rto: Optional[float] = Field(None, ge=0)
     c_damage: Optional[float] = Field(None, ge=0)
@@ -101,6 +103,31 @@ def health():
     ready = _engine_ready()
     return {"status": "ok", "engine_ready": ready,
             "decision_backend": engine().decider.name if ready else None}
+
+
+@lru_cache(maxsize=1)
+def vision_extractor() -> vision.VisionExtractor:
+    return vision.default_extractor()
+
+
+@app.post("/api/photos/analyze")
+def analyze_photos(files: list[UploadFile] = File(...), seller_name: str = Form("Seller")):
+    """Photo checks plus (when configured) vision-model extraction of listing details.
+
+    A plain `def`: FastAPI runs it in a worker thread, so a slow model call
+    does not block other requests.
+    """
+    if len(files) > vision.MAX_FILES:
+        raise HTTPException(422, f"Upload at most {vision.MAX_FILES} photos at a time.")
+    raw = []
+    for f in files:
+        data = f.file.read(vision.MAX_BYTES + 1)
+        raw.append((f.filename or "photo", data))
+    try:
+        photos = vision.load_photos(raw)
+    except vision.PhotoError as e:
+        raise HTTPException(422, str(e)) from None
+    return vision.analyze_photos(photos, vision_extractor(), seller_name).to_dict()
 
 
 @app.get("/api/subcategories")

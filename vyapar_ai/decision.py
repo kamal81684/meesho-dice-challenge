@@ -121,6 +121,7 @@ class RuleDecisionModel:
         score -= 0.5 if s.get("image_count", 0) >= 5 else 0.0
         score += 0.8 if len(s.get("description", "")) < 30 else -0.3
         score += 0.5 if s.get("image_count", 0) <= 1 else 0.0
+        score += 0.25 * min(int(s.get("photo_issues", 0) or 0), 4)   # blurry/dark/small photos
         score = min(5.0, max(1.0, score))
         lo = int(score)
         frac = score - lo

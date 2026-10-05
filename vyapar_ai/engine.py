@@ -47,6 +47,7 @@ class SellerProduct:
     image_count: int = 3
     seller_name: str = "Seller"
     description: str = ""
+    photo_issues: int = 0          # photo-quality problems from vision.analyze_photos
     return_comments: list[str] = field(default_factory=list)  # buyer comments on similar/past listings
     c_rto: Optional[float] = None       # override; default = two-way shipping
     c_damage: Optional[float] = None    # override; default = reverse ship + repack + wear
@@ -91,7 +92,8 @@ class PricingEngine:
             "title": p.title, "description": p.description, "subcategory": p.subcategory,
             "fabric": p.fabric, "pattern": p.pattern, "color": p.color,
             "has_size_chart": p.has_size_chart, "has_fabric_card": p.has_fabric_card,
-            "image_count": p.image_count, "return_comments": p.return_comments[:50],
+            "image_count": p.image_count, "photo_issues": p.photo_issues,
+            "return_comments": p.return_comments[:50],
         }, questions)
         amb = bundle.decisions.get("listing_ambiguity")
         r_ret = min(0.9, r_ret_model * ambiguity_multiplier(amb.value)) if amb else r_ret_model

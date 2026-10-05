@@ -80,6 +80,20 @@
   .ask { display:flex; gap:6px; margin-top:8px; }
   .ask input { flex:1; min-width:0; }
   .muted { color:var(--muted); font-size:13px; }
+
+  /* Photo upload */
+  .upload { margin-top:4px; border:1px dashed var(--line); border-radius:10px; padding:10px; }
+  .upload input[type=file] { border:0; padding:0; font-size:13px; }
+  .thumbs { display:grid; grid-template-columns:repeat(auto-fill, minmax(56px, 1fr)); gap:6px; margin-top:8px; }
+  .thumbs figure { margin:0; position:relative; }
+  .thumbs img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px; border:1px solid var(--line); display:block; }
+  .thumbs figure.bad img { border:2px solid var(--red); }
+  .photo-status { margin-top:8px; font-size:12.5px; line-height:1.45; }
+  .photo-status .tag { display:inline-block; background:#f4e8f5; color:var(--plum); border-radius:999px; padding:2px 8px; margin:2px 4px 0 0; font-size:12px; }
+  .photo-status .bad { color:#9f1239; }
+  .filled { animation: flash 1.6s ease-out; }
+  @keyframes flash { from { background:#fef3c7; } to { background:#fff; } }
+  @media (prefers-reduced-motion: reduce) { .filled { animation:none; } }
 </style>
 </head>
 <body>
@@ -93,6 +107,13 @@
     <form id="f">
       <label for="title">Product title</label>
       <input id="title" name="title" value="Pink printed cotton kurti" required>
+      <label for="photos">Product photos (optional, auto-fills the details below)</label>
+      <div class="upload">
+        <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+        <div id="thumbs" class="thumbs"></div>
+        <div id="photoStatus" class="photo-status muted">Up to 8 photos: front, back, close-up, worn/drape, size chart. They are checked on our server and, if a vision model is set up, sent to it.</div>
+      </div>
+      <input type="hidden" id="photo_issues" name="photo_issues" value="0">
       <label for="sub">Sub-category</label>
       <select name="subcategory" id="sub"></select>
       <div class="row">
@@ -147,7 +168,7 @@ const VERDICT = { loss: "Loss on every order", below_target: "Below your target 
 const LEVER_DONE = { add_size_chart: "Size chart add kar diya ✓", add_fabric_card: "Fabric/GSM card add kar diya ✓",
                      more_photos: "5 photos upload kar di ✓" };
 
-let lastBody = null, last = null;
+let lastBody = null, last = null, photoNudges = [];
 
 fetch("/api/subcategories").then(r => r.json()).then(t => {
   const sel = $("sub");
@@ -162,7 +183,7 @@ fetch("/api/subcategories").then(r => r.json()).then(t => {
 function formBody() {
   const fd = new FormData($("f")), body = {};
   for (const [k, v] of fd.entries()) body[k] = v;
-  for (const k of ["cogs","labor","packaging","target_profit","weight_kg","image_count"]) body[k] = Number(body[k] || 0);
+  for (const k of ["cogs","labor","packaging","target_profit","weight_kg","image_count","photo_issues"]) body[k] = Number(body[k] || 0);
   body.has_size_chart = fd.has("has_size_chart"); body.has_fabric_card = fd.has("has_fabric_card");
   return body;
 }
@@ -188,6 +209,7 @@ $("f").addEventListener("submit", async e => {
     const d = await runDay0();
     chat.innerHTML = "";
     d.nudges.forEach(botCard);
+    photoNudges.forEach(botCard);
   } catch (err) {
     $("result").innerHTML = `<h2>2 · Recommended listing price</h2><div class="warn">${esc(err.message)}</div>`;
   } finally { btn.disabled = false; btn.textContent = "Get launch price"; }
@@ -374,6 +396,74 @@ async function applyLever(lever) {
   }
   bot(msg);
   botCard(d.nudges[0]);
+}
+
+/* ---------- photo upload + extraction ---------- */
+const ISSUE_LABEL = { blurry: "blurry", too_dark: "too dark", overexposed: "overexposed", low_resolution: "low resolution" };
+
+function flash(el) { el.classList.remove("filled"); void el.offsetWidth; el.classList.add("filled"); }
+function setField(id, value) {
+  const el = $(id);
+  if (!el || value === null || value === undefined || value === "") return false;
+  if (el.tagName === "SELECT" && ![...el.options].some(o => o.value === value)) return false;
+  if (el.value === String(value)) return false;
+  el.value = value; flash(el); return true;
+}
+
+$("photos").addEventListener("change", async e => {
+  const files = [...e.target.files].slice(0, 8);
+  const status = $("photoStatus"), thumbs = $("thumbs");
+  thumbs.innerHTML = "";
+  photoNudges = [];
+  $("photo_issues").value = 0;
+  if (!files.length) return;
+  files.forEach(f => {
+    const fig = document.createElement("figure");
+    const img = document.createElement("img"); img.alt = f.name; img.src = URL.createObjectURL(f);
+    fig.appendChild(img); thumbs.appendChild(fig);
+  });
+  status.textContent = "Analysing photos…";
+  const fd = new FormData();
+  files.forEach(f => fd.append("files", f));
+  fd.append("seller_name", $("seller_name").value || "Seller");
+  try {
+    const r = await fetch("/api/photos/analyze", { method: "POST", body: fd });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Upload failed (" + r.status + ")");
+    applyPhotoReport(d);
+  } catch (err) {
+    status.innerHTML = `<span class="bad">${esc(err.message)}</span>`;
+  }
+});
+
+function applyPhotoReport(d) {
+  const s = d.suggested, filled = [];
+  if (setField("sub", s.subcategory)) filled.push(s.subcategory.replaceAll("_", " "));
+  if (setField("fabric", s.fabric)) filled.push(s.fabric);
+  if (setField("pattern", s.pattern)) filled.push(s.pattern);
+  if (setField("color", s.color)) filled.push(s.color);
+  if (s.title && setField("title", s.title)) filled.push("title");
+  setField("image_count", s.image_count);
+  if (s.has_size_chart && !$("has_size_chart").checked) { $("has_size_chart").checked = true; filled.push("size chart"); }
+  if (s.has_fabric_card && !$("has_fabric_card").checked) { $("has_fabric_card").checked = true; filled.push("fabric card"); }
+  const photoIssues = d.photos.reduce((n, p) => n + p.issues.length, 0);
+  $("photo_issues").value = photoIssues;
+  [...$("thumbs").children].forEach((fig, i) => {
+    const p = d.photos[i];
+    if (p && p.issues.length) { fig.classList.add("bad"); fig.title = p.issues.map(x => ISSUE_LABEL[x] || x).join(", "); }
+  });
+  photoNudges = d.nudges || [];
+  const detected = [s.subcategory, s.fabric, s.pattern, s.color].filter(Boolean).map(x => x.replaceAll("_", " "));
+  const conf = s.confidence != null ? ` (${Math.round(s.confidence * 100)}% sure)` : "";
+  const source = d.backend === "vlm" ? "vision model" : "photo checks only";
+  let html = `<div>Detected from ${d.photos.length} photo${d.photos.length > 1 ? "s" : ""} via <b>${esc(source)}</b>${esc(conf)}:</div>`;
+  html += detected.length ? detected.map(t => `<span class="tag">${esc(t)}</span>`).join("") : `<span class="muted">no details detected</span>`;
+  if (s.has_size_chart) html += `<span class="tag">size chart</span>`;
+  if (s.has_fabric_card) html += `<span class="tag">fabric label</span>`;
+  if (d.issues.length) html += `<div class="bad">Photo problems: ${esc(d.issues.map(x => ISSUE_LABEL[x] || x).join(", "))}</div>`;
+  if (d.model_error) html += `<div class="muted">Vision model unavailable, used photo checks instead.</div>`;
+  html += `<div class="muted">${filled.length ? "Filled in: " + esc(filled.join(", ")) + ". Check them, then press Get launch price." : "Nothing changed in the form."}</div>`;
+  $("photoStatus").innerHTML = html;
 }
 </script>
 </body>
