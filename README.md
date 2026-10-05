@@ -93,8 +93,9 @@ confidence out. Vyapar-AI sends it these questions in one call:
 | `lifecycle_stage` | Choice | `/api/lifecycle` uses it only at ≥ 70% confidence; otherwise the state machine decides |
 
 ```bash
-export TYPESAFE_API_KEY=...        # early access: https://console.typesafe.ai
-export TYPESAFE_DEFAULT_MODEL=jev-latest
+cp .env.example .env               # then set TYPESAFE_API_KEY (early access: https://console.typesafe.ai)
+pip install python-dotenv
+uvicorn api.main:app --env-file .env
 ```
 
 With no key set, or if the API fails, a deterministic rules backend answers the
