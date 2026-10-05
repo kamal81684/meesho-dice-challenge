@@ -7,6 +7,8 @@ Decay & Salvage  (181+ or stale)-> P0 minus logistics buffer to free up cash
 """
 from __future__ import annotations
 
+from typing import Optional
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -56,7 +58,7 @@ class StageAction:
     stage: Stage
     price: int
     action: str
-    bundles: list[dict] | None = None
+    bundles: Optional[list[dict]] = None
 
 
 def bundle_offers(price: int, forward_ship: float, packaging: float) -> list[dict]:
@@ -70,7 +72,7 @@ def bundle_offers(price: int, forward_ship: float, packaging: float) -> list[dic
 
 
 def stage_action(stage: Stage, current_price: int, p0: float, break_even: float,
-                 forward_ship: float, packaging: float, bandit_price: int | None = None
+                 forward_ship: float, packaging: float, bandit_price: Optional[int] = None
                  ) -> StageAction:
     if stage == Stage.LAUNCH:
         return StageAction(stage, max(current_price, int(round(p0 * 1.03))),

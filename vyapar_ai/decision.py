@@ -26,7 +26,7 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, Protocol, Optional
 
 RETURN_REASONS = {
     "size_mismatch": "Wrong size or fit (too tight, too loose, too short or too long).",
@@ -147,7 +147,7 @@ class JevDecisionModel:
 
     name = "jev"
 
-    def __init__(self, client: Any = None, model: str | None = None):
+    def __init__(self, client: Any = None, model: Optional[str] = None):
         if client is None:
             from typesafe_sdk import TypeSafeClient
             client = TypeSafeClient(model=model or os.getenv("TYPESAFE_DEFAULT_MODEL", "jev-latest"))
@@ -198,11 +198,11 @@ def _rescale_score(score: float, legend: dict) -> float:
 class FallbackDecisionModel:
     """Try Jev; on any API/network error, answer with rules so pricing never blocks."""
 
-    def __init__(self, primary: DecisionModel, fallback: DecisionModel | None = None):
+    def __init__(self, primary: DecisionModel, fallback: Optional[DecisionModel] = None):
         self.primary = primary
         self.fallback = fallback or RuleDecisionModel()
         self.name = primary.name
-        self.last_error: str | None = None
+        self.last_error: Optional[str] = None
 
     def decide(self, state: dict, questions: list[str]) -> DecisionBundle:
         try:
@@ -231,7 +231,7 @@ def ambiguity_multiplier(score: float) -> float:
     return 1 + 0.075 * (score - 3)
 
 
-def prioritise_levers(levers: list[dict], reason: Decision | None) -> list[dict]:
+def prioritise_levers(levers: list[dict], reason: Optional[Decision]) -> list[dict]:
     """Put the lever that fixes the dominant return reason first, weighted by probability."""
     if reason is None or not reason.probabilities:
         return levers

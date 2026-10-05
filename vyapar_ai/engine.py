@@ -5,6 +5,8 @@ seller input -> embedding -> similar listings + competitor band -> risk model
 """
 from __future__ import annotations
 
+from typing import Optional
+
 from dataclasses import dataclass, field
 
 from . import nudges
@@ -34,9 +36,9 @@ class SellerProduct:
     packaging: float = 0.0
     target_profit: float = 0.0
     platform_fees: float = 0.0
-    fabric: str | None = None
-    pattern: str | None = None
-    color: str | None = None
+    fabric: Optional[str] = None
+    pattern: Optional[str] = None
+    color: Optional[str] = None
     weight_kg: float = 0.4
     tax_rate: float = 0.07
     cod_share: float = 0.75
@@ -46,8 +48,8 @@ class SellerProduct:
     seller_name: str = "Seller"
     description: str = ""
     return_comments: list[str] = field(default_factory=list)  # buyer comments on similar/past listings
-    c_rto: float | None = None       # override; default = two-way shipping
-    c_damage: float | None = None    # override; default = reverse ship + repack + wear
+    c_rto: Optional[float] = None       # override; default = two-way shipping
+    c_damage: Optional[float] = None    # override; default = reverse ship + repack + wear
 
 
 @dataclass
@@ -67,7 +69,7 @@ class Day0Result:
 
 class PricingEngine:
     def __init__(self, catalog=None, seed: int = 7,
-                 decision_model: DecisionModel | None = None):
+                 decision_model: Optional[DecisionModel] = None):
         self.catalog = catalog or generate_catalog(3000, seed=seed)
         self.index = SimilarityIndex(self.catalog)
         self.risk = RiskModel().fit(self.catalog)

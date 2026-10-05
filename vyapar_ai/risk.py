@@ -6,6 +6,7 @@ photos would cut the predicted return rate. These drive the nudges.
 """
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
@@ -67,8 +68,11 @@ class RiskModel:
 
     def predict(self, f: RiskFeatures) -> tuple[float, float]:
         x = np.array([f.vector()])
-        ret = float(np.clip(self.ret_model.predict(x)[0], 0.0, 0.9))
-        rto = float(np.clip(self.rto_model.predict(x)[0], 0.0, 0.9))
+        with warnings.catch_warnings():
+            # LightGBM names columns Column_0..N at fit time; plain arrays are expected here.
+            warnings.filterwarnings("ignore", message="X does not have valid feature names")
+            ret = float(np.clip(self.ret_model.predict(x)[0], 0.0, 0.9))
+            rto = float(np.clip(self.rto_model.predict(x)[0], 0.0, 0.9))
         return ret, rto
 
     def lever_impacts(self, f: RiskFeatures) -> list[dict]:

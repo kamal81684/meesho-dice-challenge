@@ -5,6 +5,8 @@ delivered orders are returned; cash flow is tallied per order outcome.
 """
 from __future__ import annotations
 
+from typing import Optional
+
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -122,7 +124,7 @@ def run_vyapar(params: MarketParams, costs: CostInputs, launch_price: int,
     bandit = LinUCB(n_features=6, seed=seed)
     res = SimResult()
     price = launch_price
-    pending: tuple[int, np.ndarray] | None = None
+    pending: Optional[tuple[int, np.ndarray]] = None
     for day in range(1, days + 1):
         sig = Signals(day=day, reviews=m.reviews, rating=params.rating,
                       weekly_velocity=sum(d.orders for d in res.logs[-7:]),

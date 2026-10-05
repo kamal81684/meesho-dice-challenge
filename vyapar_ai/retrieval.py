@@ -6,6 +6,8 @@ interfaces so they can be swapped without touching the engine.
 """
 from __future__ import annotations
 
+from typing import Optional
+
 import hashlib
 import re
 from dataclasses import dataclass
@@ -31,8 +33,8 @@ class Embedder:
         self._attr_index = {a: i for i, a in enumerate(self.vocab_attrs)}
         self.dim = DIM_TEXT + len(self.vocab_attrs)
 
-    def embed(self, title: str, fabric: str | None = None, pattern: str | None = None,
-              color: str | None = None) -> np.ndarray:
+    def embed(self, title: str, fabric: Optional[str] = None, pattern: Optional[str] = None,
+              color: Optional[str] = None) -> np.ndarray:
         v = np.zeros(self.dim, dtype=np.float32)
         for tok in _tokens(title):
             h = int(hashlib.md5(tok.encode()).hexdigest(), 16)
@@ -65,14 +67,14 @@ class MarketSnapshot:
 
 
 class SimilarityIndex:
-    def __init__(self, listings: list[Listing], embedder: Embedder | None = None):
+    def __init__(self, listings: list[Listing], embedder: Optional[Embedder] = None):
         self.embedder = embedder or Embedder()
         self.listings = listings
         self.matrix = np.vstack([self.embedder.embed_listing(l) for l in listings])
         self._sub = np.array([l.subcategory for l in listings])
         self._cat = np.array([l.category for l in listings])
 
-    def search(self, query: np.ndarray, mask: np.ndarray | None = None,
+    def search(self, query: np.ndarray, mask: Optional[np.ndarray] = None,
                k: int = 20) -> list[tuple[int, float]]:
         sims = self.matrix @ query
         if mask is not None:
@@ -85,8 +87,8 @@ class SimilarityIndex:
         return [(int(i), float(sims[i])) for i in top]
 
     def market_snapshot(self, title: str, subcategory: str, category: str,
-                        fabric: str | None = None, pattern: str | None = None,
-                        color: str | None = None, k: int = 20,
+                        fabric: Optional[str] = None, pattern: Optional[str] = None,
+                        color: Optional[str] = None, k: int = 20,
                         min_support: int = 8, min_sim: float = 0.3) -> MarketSnapshot:
         """Hierarchical fallback: subcategory -> category -> global.
 

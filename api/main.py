@@ -1,6 +1,8 @@
 """FastAPI microservice for Vyapar-AI (Slide 6: "Real-time FastAPI microservice")."""
 from __future__ import annotations
 
+from typing import Optional
+
 from functools import lru_cache
 from pathlib import Path
 
@@ -39,9 +41,9 @@ class Day0Request(BaseModel):
     packaging: float = Field(0, ge=0)
     target_profit: float = Field(0, ge=0)
     platform_fees: float = Field(0, ge=0)
-    fabric: str | None = None
-    pattern: str | None = None
-    color: str | None = None
+    fabric: Optional[str] = None
+    pattern: Optional[str] = None
+    color: Optional[str] = None
     weight_kg: float = Field(0.4, gt=0)
     tax_rate: float = Field(0.07, ge=0, lt=1)
     cod_share: float = Field(0.75, ge=0, le=1)
@@ -51,8 +53,8 @@ class Day0Request(BaseModel):
     seller_name: str = "Seller"
     description: str = ""
     return_comments: list[str] = Field(default_factory=list)
-    c_rto: float | None = Field(None, ge=0)
-    c_damage: float | None = Field(None, ge=0)
+    c_rto: Optional[float] = Field(None, ge=0)
+    c_damage: Optional[float] = Field(None, ge=0)
 
 
 class LifecycleRequest(BaseModel):
@@ -67,7 +69,7 @@ class LifecycleRequest(BaseModel):
     r_rto: float = Field(0.18, ge=0, le=1)
     r_ret: float = Field(0.15, ge=0, le=1)
     weight_kg: float = 0.4
-    competitor_price: float | None = None
+    competitor_price: Optional[float] = None
     recent_reviews: list[str] = Field(default_factory=list)
     seller_notes: str = ""
     signals: Signals

@@ -7,6 +7,8 @@ P0 is the break-even-plus-target floor: the engine never recommends below it.
 """
 from __future__ import annotations
 
+from typing import Optional
+
 import math
 from dataclasses import dataclass, asdict
 
@@ -92,7 +94,7 @@ class Recommendation:
 LAUNCH_WEDGE = 0.03  # Slide 4: launch at P0 + 3%
 
 
-def recommend_launch_price(c: CostInputs, band: PriceBand | None = None) -> Recommendation:
+def recommend_launch_price(c: CostInputs, band: Optional[PriceBand] = None) -> Recommendation:
     """Combine the P0 floor with the competitor band into a Day-0 price.
 
     Guardrails (Slide 4/6): P >= P0 always; prefer P <= band.high so the
