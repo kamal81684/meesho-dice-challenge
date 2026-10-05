@@ -337,8 +337,8 @@ button { cursor: pointer; }
             </div>
             <div class="product-meta">
               <span class="quality-badge" id="qualityBadge"><svg aria-hidden="true" class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg><span id="qualityText">Add a photo to auto-fill</span></span>
-              <h3 id="pmTitle">Pink printed cotton kurti</h3>
-              <p id="pmAttrs">Kurti · Cotton · Printed</p>
+              <h3 id="pmTitle">Your product</h3>
+              <p id="pmAttrs"></p>
               <button class="text-button" id="changePhotoBtn" type="button"><svg aria-hidden="true" class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/></svg><span data-i18n="changePhoto">Add / change photo</span></button>
             </div>
           </div>
@@ -347,8 +347,8 @@ button { cursor: pointer; }
 
           <div class="subheading"><h3 data-i18n="prodInfo">Product information</h3><span data-i18n="reviewEdit">Review and edit if needed</span></div>
           <div class="field-grid">
-            <label class="field wide"><span data-i18n="fTitle">Product title</span><span class="input-wrap"><input id="title" value="Pink printed cotton kurti"></span></label>
-            <label class="field"><span data-i18n="fCategory">Category</span><span class="select-wrap"><select id="sub"><option value="kurti">kurti</option></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
+            <label class="field wide"><span data-i18n="fTitle">Product title</span><span class="input-wrap"><input id="title" value=""></span></label>
+            <label class="field"><span data-i18n="fCategory">Category</span><span class="select-wrap"><select id="sub"><option value="">—</option></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
             <label class="field"><span data-i18n="fColour">Colour</span><span class="select-wrap"><select id="color"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
             <label class="field"><span data-i18n="fFabric">Fabric</span><span class="select-wrap"><select id="fabric"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
             <label class="field"><span data-i18n="fPattern">Pattern</span><span class="select-wrap"><select id="pattern"></select><svg aria-hidden="true" class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"/></svg></span></label>
@@ -560,18 +560,18 @@ button { cursor: pointer; }
 
   var photos = [], lastBody = null, day0 = null, report = null, debounce = null, hasPrice = false;
 
-  function fill(sel, values) { sel.innerHTML = ""; values.forEach(function (v) { sel.appendChild(new Option(v, v)); }); }
+  function fill(sel, values) { sel.innerHTML = '<option value="">—</option>'; values.forEach(function (v) { sel.appendChild(new Option(v, v)); }); }
   fill($("fabric"), FABRICS); fill($("pattern"), PATTERNS); fill($("color"), COLORS);
 
   fetch("/api/subcategories").then(function (r) { return r.json(); }).then(function (t) {
-    var sel = $("sub"); sel.innerHTML = "";
+    var sel = $("sub"), selected = sel.value; sel.innerHTML = '<option value="">—</option>';
     Object.keys(t).forEach(function (cat) {
       var g = document.createElement("optgroup"); g.label = cat.replace(/_/g, " ");
       (t[cat] || []).forEach(function (s) { g.appendChild(new Option(s.replaceAll("_", " "), s)); });
       sel.appendChild(g);
     });
-    sel.value = "kurti"; updateAttrs();
-  }).catch(function () { $("sub").innerHTML = '<option value="kurti">kurti</option>'; });
+    sel.value = selected; updateAttrs();
+  }).catch(function () { $("sub").innerHTML = '<option value="">—</option>'; });
 
   function num(id) { var v = Number($(id).value); return isFinite(v) ? v : 0; }
   function imgCount() { var n = photos.length; if ($("more_photos").checked) n = Math.max(5, n || 3); return n || 3; }
@@ -579,7 +579,7 @@ button { cursor: pointer; }
   function currentBody() {
     return {
       title: ($("title").value || "").trim() || "Product",
-      subcategory: $("sub").value || "kurti",
+      subcategory: $("sub").value,
       cogs: num("cogs"), labor: num("labor"), packaging: num("packaging"), target_profit: num("target_profit"),
       fabric: $("fabric").value, pattern: $("pattern").value, color: $("color").value,
       weight_kg: num("weight_kg") || 0.4,
@@ -612,6 +612,10 @@ button { cursor: pointer; }
     else { b.innerHTML = '<span id="calcLabel">' + esc(T("showPrice")) + "</span> " + ICO.arrow; }
   }
   function runDay0(spin, silent) {
+    if (!$("sub").value) {
+      if (!silent) toast(T("fCategory") + ": " + T("reviewEdit"));
+      return Promise.resolve();
+    }
     lastBody = currentBody();
     if (spin) setLoading(true);
     return api("/api/day0", lastBody).then(function (d) {
