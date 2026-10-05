@@ -202,3 +202,20 @@ def test_doc_ai_failure_still_answers_via_pixel_checks():
     report = analyze_photos([Photo("a", garment((30, 60, 180)))], ext)
     assert report.backend.startswith("pixel-checks")
     assert report.suggested["color"] == "blue"
+
+
+def test_non_product_photo_fills_nothing_and_warns():
+    out = dict(MODEL_JSON, is_product_photo=False, suggested_title="unknown")
+    report = analyze_photos([Photo("a", garment((240, 120, 170)))], fake_vlm(json.dumps(out)))
+    s = report.suggested
+    assert s["is_product_photo"] is False
+    assert (s["subcategory"], s["fabric"], s["pattern"], s["color"], s["title"]) == (None,) * 5
+    assert s["has_size_chart"] is False and s["has_fabric_card"] is False
+    assert report.missing_shots == []
+    assert report.nudges[0]["type"] == "not_product"
+
+
+def test_placeholder_titles_are_dropped():
+    for t in ("unknown", "Unknown", " N/A ", ""):
+        assert vision._title(t) is None
+    assert vision._title("Pink printed cotton kurti") == "Pink printed cotton kurti"

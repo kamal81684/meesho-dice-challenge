@@ -285,6 +285,26 @@ button { cursor: pointer; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(-3px); }
 @media (max-width: 680px) { .toast { bottom: 88px; } }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+/* Photo-check pop-up */
+.pc-overlay { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; background: rgba(40, 18, 43, .45); }
+.pc-sheet { width: min(100%, 420px); max-height: calc(100vh - 32px); overflow-y: auto; padding: 20px; border-radius: 16px; background: var(--card); box-shadow: 0 24px 60px rgba(40, 18, 43, .28); animation: pc-in .18s ease-out; }
+.pc-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--amber-soft); color: var(--amber); }
+.pc-sheet.error .pc-icon { background: #fde8ec; color: #b4233f; }
+.pc-sheet h2 { margin: 12px 0 6px; font-size: 17px; line-height: 1.3; }
+.pc-sheet p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.pc-list { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.pc-list li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; }
+.pc-list img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); }
+.pc-list b { display: block; font-size: 13px; }
+.pc-list span { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.pc-preview { width: 100%; max-height: 180px; margin-top: 14px; border-radius: 10px; object-fit: contain; background: var(--brand-pale); }
+.pc-actions { margin-top: 18px; display: grid; gap: 8px; }
+.pc-actions .primary-button { min-height: 44px; }
+.pc-ghost { min-height: 40px; border: 1px solid var(--line-strong); border-radius: 10px; background: transparent; color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer; }
+.pc-ghost:hover { background: var(--brand-pale); }
+@keyframes pc-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 680px) { .pc-overlay { place-items: end center; padding: 0; } .pc-sheet { width: 100%; border-radius: 16px 16px 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { .pc-sheet { animation: none; } }
 </style>
 </head>
 <body>
@@ -452,6 +472,7 @@ button { cursor: pointer; }
   /* ---------------- i18n ---------------- */
   var I18N = {
     en: {
+      pcNotProductTitle: "This doesn't look like a product photo", pcNotProductBody: "We couldn't find a product in it, so nothing was filled in. Upload a clear photo of the product itself.", pcUploadNew: "Upload a new photo", pcKeepPhoto: "Keep this photo", pcRetakeBody: "Clear photos get more orders and fewer returns.", pcPhotoN: "Photo {n}", pcReplace1: "Replace this photo", pcReplaceN: "Replace {n} photos", pcKeepAnyway: "Keep anyway", pcClose: "Close", tip_blurry: "Hold the phone steady and tap the product to focus.", tip_too_dark: "Shoot in daylight, near a window.", tip_overexposed: "Avoid flash and harsh direct sunlight.", tip_low_resolution: "Use the original camera photo, not a downloaded image or screenshot.",
       help: "Help", langAria: "Switch language (English / Hindi)",
       kicker: "Smart pricing for your business",
       heroTitle: "Price your product with confidence",
@@ -508,6 +529,7 @@ button { cursor: pointer; }
       waNudgeDefault: "Keep your price above the safe floor and add a size chart to reduce returns."
     },
     hi: {
+      pcNotProductTitle: "यह प्रोडक्ट की फ़ोटो नहीं लग रही", pcNotProductBody: "हमें इसमें कोई प्रोडक्ट नहीं मिला, इसलिए कुछ भी नहीं भरा गया। प्रोडक्ट की साफ़ फ़ोटो डालें।", pcUploadNew: "नई फ़ोटो डालें", pcKeepPhoto: "यही फ़ोटो रखें", pcRetakeBody: "साफ़ फ़ोटो से ज़्यादा ऑर्डर और कम रिटर्न आते हैं।", pcPhotoN: "फ़ोटो {n}", pcReplace1: "यह फ़ोटो बदलें", pcReplaceN: "{n} फ़ोटो बदलें", pcKeepAnyway: "फिर भी रखें", pcClose: "बंद करें", tip_blurry: "फ़ोन स्थिर रखें और फ़ोकस के लिए प्रोडक्ट पर टैप करें।", tip_too_dark: "दिन की रोशनी में, खिड़की के पास फ़ोटो लें।", tip_overexposed: "फ़्लैश और तेज़ धूप से बचें।", tip_low_resolution: "कैमरे की असली फ़ोटो डालें, डाउनलोड की हुई या स्क्रीनशॉट नहीं।",
       help: "मदद", langAria: "भाषा बदलें (अंग्रेज़ी / हिंदी)",
       kicker: "आपके व्यापार के लिए स्मार्ट प्राइसिंग",
       heroTitle: "भरोसे के साथ अपने प्रोडक्ट का दाम तय करें",
@@ -845,6 +867,7 @@ button { cursor: pointer; }
     $("productHint").textContent = T("productHint");
     updateTaskCount();
     if (hasPrice) runDay0(false, true);
+    maybePhotoPopup(d);
   }
   var _filled = [];
   function renderDetected() {
@@ -861,6 +884,82 @@ button { cursor: pointer; }
     det.innerHTML = html; det.hidden = false;
   }
 
+
+  /* ---- photo-check pop-up: shown when the analysis finds a problem the seller should fix */
+  var _pcDismissed = null, _pcReturnFocus = null;
+  function photoSetKey(d) {
+    return photos.map(function (f) { return f.name + ":" + f.size; }).join("|") + "#" +
+      (d.suggested && d.suggested.is_product_photo === false ? "np" : "") +
+      (d.photos || []).map(function (p) { return (p.issues || []).join(","); }).join("|");
+  }
+  function closePhotoPopup() {
+    var o = $("pcOverlay"); if (!o) return;
+    o.remove(); document.removeEventListener("keydown", pcKeys);
+    if (_pcReturnFocus && _pcReturnFocus.focus) _pcReturnFocus.focus();
+  }
+  function pcKeys(e) {
+    if (e.key === "Escape") { _pcDismissed = _pcLastKey; closePhotoPopup(); return; }
+    if (e.key !== "Tab") return;
+    var f = [].slice.call($("pcOverlay").querySelectorAll("button"));
+    if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  }
+  var _pcLastKey = null;
+  function replacePhotos(indexes) {
+    indexes.sort(function (a, b) { return b - a; }).forEach(function (i) {
+      var f = photos[i]; if (f && f._url) URL.revokeObjectURL(f._url); photos.splice(i, 1);
+    });
+    closePhotoPopup();
+    setCover(); renderStrip();
+    if (photos.length) analyzePhotos(); else { report = null; updateQuality(); renderDetected(); }
+    $("photos").click();
+  }
+  function maybePhotoPopup(d) {
+    var notProduct = d.suggested && d.suggested.is_product_photo === false;
+    var bad = [];
+    (d.photos || []).forEach(function (p, i) { if (p.issues && p.issues.length && photos[i]) bad.push(i); });
+    if (!notProduct && !bad.length) return;
+    var key = photoSetKey(d);
+    if (key === _pcDismissed || $("pcOverlay")) return;
+    _pcLastKey = key;
+    _pcReturnFocus = document.activeElement;
+
+    var warn = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>';
+    var title, body, extra = "", primary, primaryIdx, secondary;
+    if (notProduct) {
+      title = T("pcNotProductTitle"); body = T("pcNotProductBody");
+      if (photos[0] && photos[0]._url) extra = '<img class="pc-preview" alt="" src="' + photos[0]._url + '">';
+      primary = T("pcUploadNew"); primaryIdx = photos.map(function (_, i) { return i; });
+      secondary = T("pcKeepPhoto");
+    } else {
+      title = bad.length === 1 ? T("badgeRetake1") : TF("badgeRetakeN", { n: bad.length });
+      body = T("pcRetakeBody");
+      extra = '<ul class="pc-list">' + bad.map(function (i) {
+        var p = d.photos[i], f = photos[i];
+        var names = p.issues.map(function (x) { return T("issue_" + x); }).join(", ");
+        var tips = p.issues.map(function (x) { return T("tip_" + x); }).join(" ");
+        return '<li><img alt="" src="' + (f._url || "") + '"><div><b>' + esc(TF("pcPhotoN", { n: i + 1 })) + " · " + esc(names) +
+               "</b><span>" + esc(tips) + "</span></div></li>";
+      }).join("") + "</ul>";
+      primary = bad.length === 1 ? T("pcReplace1") : TF("pcReplaceN", { n: bad.length }); primaryIdx = bad;
+      secondary = T("pcKeepAnyway");
+    }
+    var o = document.createElement("div");
+    o.id = "pcOverlay"; o.className = "pc-overlay";
+    o.innerHTML = '<div class="pc-sheet' + (notProduct ? " error" : "") + '" role="dialog" aria-modal="true" aria-labelledby="pcTitle" aria-describedby="pcBody">' +
+      '<div class="pc-icon">' + warn + "</div>" +
+      '<h2 id="pcTitle">' + esc(title) + "</h2>" +
+      '<p id="pcBody">' + esc(body) + "</p>" + extra +
+      '<div class="pc-actions"><button type="button" class="primary-button" id="pcPrimary">' + esc(primary) + "</button>" +
+      '<button type="button" class="pc-ghost" id="pcSecondary">' + esc(secondary) + "</button></div></div>";
+    document.body.appendChild(o);
+    $("pcPrimary").addEventListener("click", function () { replacePhotos(primaryIdx.slice()); });
+    $("pcSecondary").addEventListener("click", function () { _pcDismissed = key; closePhotoPopup(); });
+    o.addEventListener("click", function (e) { if (e.target === o) { _pcDismissed = key; closePhotoPopup(); } });
+    document.addEventListener("keydown", pcKeys);
+    $("pcPrimary").focus();
+  }
   function applyI18n() {
     document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = T(el.getAttribute("data-i18n")); });
     document.querySelectorAll("[data-i18n-attr]").forEach(function (el) {
