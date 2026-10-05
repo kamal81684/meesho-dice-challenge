@@ -50,3 +50,32 @@ pytest -q
 uvicorn api.main:app --reload     # open http://127.0.0.1:8000
 python scripts/backtest.py
 ```
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/` | Day-0 listing UI (Slide 5 wireframe) |
+| `POST` | `/api/day0` | Floor P₀, launch price, competitor band, risk, levers, nudges |
+| `POST` | `/api/lifecycle` | Stage detection (launch/scale/defense/salvage), price action, bundles, competitor alert |
+| `GET` | `/api/subcategories` | Supported taxonomy |
+
+Interactive docs: `http://127.0.0.1:8000/docs`.
+
+## Backtest result (simulated, Slide 8 scenario)
+
+`python scripts/backtest.py` runs an unstitched cotton suit set from Surat
+(COGS ₹220, labour+packaging ₹20, target profit ₹40, band ₹370–₹399)
+over 150 simulated days, averaged across 20 random seeds:
+
+| Metric | Manual seller (₹349 → ₹399 on day 120, no fabric card) | Vyapar-AI (P₀ launch + fabric card + LinUCB) |
+|---|---|---|
+| Launch price | ₹349 | ₹379 (P₀ = ₹367) |
+| Day the final price is reached | 120 | ~26 |
+| Cash on the first 100 orders | ≈ −₹660 | ≈ +₹3,700 |
+| Day the seller is cash-positive for good | ~113 | ~6 |
+| Realised return rate | 15% | 8% |
+
+> These numbers come from a **synthetic** market model (`vyapar_ai/simulator.py`),
+> not real Meesho data. They show the mechanism works; they are not a claim
+> about real-world impact.

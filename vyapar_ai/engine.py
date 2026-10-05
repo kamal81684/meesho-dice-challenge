@@ -31,6 +31,7 @@ class SellerProduct:
     labor: float = 0.0
     packaging: float = 0.0
     target_profit: float = 0.0
+    platform_fees: float = 0.0
     fabric: str | None = None
     pattern: str | None = None
     color: str | None = None
@@ -80,7 +81,8 @@ class PricingEngine:
         c_damage = (p.c_damage if p.c_damage is not None
                     else ship + p.packaging + 0.03 * p.cogs)
         costs = CostInputs(cogs=p.cogs, labor=p.labor, packaging=p.packaging,
-                           target_profit=p.target_profit, r_rto=r_rto, c_rto=c_rto,
+                           target_profit=p.target_profit, platform_fees=p.platform_fees,
+                           r_rto=r_rto, c_rto=c_rto,
                            r_ret=r_ret, c_damage=c_damage, tax_rate=p.tax_rate)
         band = PriceBand(snap.band_low, snap.band_high, snap.median_price)
         rec = recommend_launch_price(costs, band)
@@ -100,6 +102,7 @@ class PricingEngine:
                   "category_rto_rate": round(snap.mean_rto_rate, 4)},
             cost_breakdown={
                 "cogs": p.cogs, "labor": p.labor, "packaging": p.packaging,
+                "platform_fees": p.platform_fees,
                 "expected_rto_cost": round(r_rto * c_rto, 2),
                 "expected_return_cost": round(r_ret * c_damage, 2),
                 "target_profit": p.target_profit,
