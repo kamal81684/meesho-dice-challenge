@@ -12,11 +12,26 @@
   body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:#2a1630; }
   header { background:linear-gradient(90deg,var(--plum),var(--pink)); color:#fff; padding:14px 16px; }
   header h1 { margin:0; font-size:20px; } header p { margin:2px 0 0; opacity:.85; font-size:13px; }
-  main { max-width:1180px; margin:0 auto; padding:16px; display:grid; gap:16px;
-         grid-template-columns: minmax(0,1fr) minmax(0,1.3fr) minmax(0,.9fr); align-items:start; }
-  @media (max-width: 980px) { main { grid-template-columns: 1fr; } }
+  main { max-width:800px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; min-width:0; }
   h2 { font-size:15px; margin:0 0 12px; color:var(--plum); }
+
+  /* Accordion */
+  .acc { padding:0; overflow:hidden; }
+  .acc-head { display:flex; align-items:center; gap:10px; width:100%; margin:0; padding:14px 16px;
+              border:0; background:none; font:inherit; text-align:left; cursor:pointer; color:var(--plum); }
+  .acc-head:hover { background:#fdf7fe; }
+  .step { flex:0 0 auto; width:24px; height:24px; border-radius:50%; background:var(--plum); color:#fff;
+          font-size:13px; font-weight:700; display:grid; place-items:center; }
+  .acc-title { font-size:15px; font-weight:600; }
+  .acc-summary { margin-left:auto; font-size:12px; color:var(--muted); text-align:right; max-width:44%;
+                 overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chev { flex:0 0 auto; width:16px; height:16px; color:var(--muted); transition:transform .25s ease; }
+  .acc.open .chev { transform:rotate(180deg); }
+  .acc-body { display:grid; grid-template-rows:0fr; transition:grid-template-rows .28s ease; }
+  .acc.open .acc-body { grid-template-rows:1fr; }
+  .acc-inner { overflow:hidden; min-height:0; }
+  .acc-pad { padding:2px 16px 16px; }
   label { display:block; font-size:12px; color:var(--muted); margin:8px 0 3px; }
   input, select { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; }
   .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -123,7 +138,10 @@
   .auto { font-size:10px; font-weight:700; color:#166534; background:#dcfce7; border-radius:4px; padding:1px 5px; margin-left:6px; }
   .filled { animation: flash 1.6s ease-out; }
   @keyframes flash { from { background:#fef3c7; } to { background:#fff; } }
-  @media (prefers-reduced-motion: reduce) { .filled, .spinner { animation:none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .filled, .spinner { animation:none; }
+    .acc-body, .chev { transition:none; }
+  }
 </style>
 </head>
 <body>
@@ -132,8 +150,16 @@
   <p>Turn your product into profit with data-driven pricing</p>
 </header>
 <main>
-  <section class="card">
-    <h2>1 · Product details & costs (per unit)</h2>
+  <section class="card acc open" id="sec1">
+    <button class="acc-head" id="accBtn1" type="button" aria-expanded="true" aria-controls="accBody1">
+      <span class="step" aria-hidden="true">1</span>
+      <span class="acc-title">Product details &amp; costs</span>
+      <span class="acc-summary" id="sum1"></span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="acc-body" id="accBody1" role="region" aria-labelledby="accBtn1">
+      <div class="acc-inner">
+        <div class="acc-pad">
     <form id="f">
       <div class="field-head"><span class="flabel" id="photosLabel">Product photos</span><span class="hint">optional · fills in the details for you</span></div>
       <div class="dropzone" id="dropzone">
@@ -172,26 +198,52 @@
         <div><label for="packaging">Packaging (₹)</label><input id="packaging" name="packaging" type="number" value="10"></div>
         <div><label for="target_profit">Target net profit (₹)</label><input id="target_profit" name="target_profit" type="number" value="40"></div>
       </div>
-      <div class="row">
-        <div><label for="image_count">Photos uploaded</label><input id="image_count" name="image_count" type="number" value="3"></div>
-        <div><label for="seller_name">Your name</label><input id="seller_name" name="seller_name" value="Ramesh"></div>
-      </div>
+      <label for="seller_name">Your name</label>
+      <input id="seller_name" name="seller_name" value="Ramesh">
+      <input type="hidden" id="image_count" name="image_count" value="3">
       <div class="checks">
         <label><input type="checkbox" id="has_size_chart" name="has_size_chart"> Size chart added</label>
         <label><input type="checkbox" id="has_fabric_card" name="has_fabric_card"> Fabric/GSM card added</label>
       </div>
       <button id="go" type="submit">Get launch price</button>
     </form>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section class="card" id="result">
-    <h2>2 · Recommended listing price</h2>
-    <p class="muted">Fill in the form and press <b>Get launch price</b>.</p>
+  <section class="card acc" id="sec2">
+    <button class="acc-head" id="accBtn2" type="button" aria-expanded="false" aria-controls="accBody2">
+      <span class="step" aria-hidden="true">2</span>
+      <span class="acc-title">Recommended listing price</span>
+      <span class="acc-summary" id="sum2"></span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="acc-body" id="accBody2" role="region" aria-labelledby="accBtn2">
+      <div class="acc-inner">
+        <div class="acc-pad">
+          <div id="result">
+            <p class="muted">Fill in the form and press <b>Get launch price</b>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section class="card">
-    <h2>3 · WhatsApp nudges</h2>
-    <div class="chat" id="chat" aria-live="polite"><p class="muted">Vyapar-AI Bot messages will appear here.</p></div>
+  <section class="card acc" id="sec3">
+    <button class="acc-head" id="accBtn3" type="button" aria-expanded="false" aria-controls="accBody3">
+      <span class="step" aria-hidden="true">3</span>
+      <span class="acc-title">WhatsApp nudges</span>
+      <span class="acc-summary" id="sum3"></span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="acc-body" id="accBody3" role="region" aria-labelledby="accBtn3">
+      <div class="acc-inner">
+        <div class="acc-pad">
+          <div class="chat" id="chat" aria-live="polite"><p class="muted">Vyapar-AI Bot messages will appear here.</p></div>
+        </div>
+      </div>
+    </div>
   </section>
 </main>
 <script>
@@ -206,6 +258,43 @@ const LEVER_DONE = { add_size_chart: "Size chart add kar diya ✓", add_fabric_c
                      more_photos: "5 photos upload kar di ✓" };
 
 let lastBody = null, last = null, photoNudges = [];
+
+/* ---------- accordion ---------- */
+const ACC = [null,
+  { sec: $("sec1"), btn: $("accBtn1"), sum: $("sum1") },
+  { sec: $("sec2"), btn: $("accBtn2"), sum: $("sum2") },
+  { sec: $("sec3"), btn: $("accBtn3"), sum: $("sum3") },
+];
+function isOpen(n) { return ACC[n].sec.classList.contains("open"); }
+function setOpen(n, open) {
+  const a = ACC[n];
+  a.sec.classList.toggle("open", open);
+  a.btn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+function toggleAcc(n) { setOpen(n, !isOpen(n)); }
+ACC.slice(1).forEach((a, i) => a.btn.addEventListener("click", () => toggleAcc(i + 1)));
+
+function updateSum1() {
+  const t = ($("title").value || "").trim();
+  const n = photoFiles.length;
+  const parts = [];
+  if (t) parts.push(t);
+  if (n) parts.push(n + (n === 1 ? " photo" : " photos"));
+  ACC[1].sum.textContent = parts.join(" · ");
+}
+function updateSum3() {
+  const n = chat.querySelectorAll(".bubble").length;
+  ACC[3].sum.textContent = n ? n + (n === 1 ? " message" : " messages") : "";
+}
+function afterChatAppend() {
+  updateSum3();
+  if (!isOpen(3)) setOpen(3, true);
+}
+function syncImageCount() {
+  const el = $("image_count");
+  el.value = photoFiles.length ? photoFiles.length : 3;
+}
+$("title").addEventListener("input", updateSum1);
 
 fetch("/api/subcategories").then(r => r.json()).then(t => {
   const sel = $("sub");
@@ -247,8 +336,12 @@ $("f").addEventListener("submit", async e => {
     chat.innerHTML = "";
     d.nudges.forEach(botCard);
     photoNudges.forEach(botCard);
+    updateSum3();
+    setOpen(1, false);
+    setOpen(2, true);
   } catch (err) {
-    $("result").innerHTML = `<h2>2 · Recommended listing price</h2><div class="warn">${esc(err.message)}</div>`;
+    $("result").innerHTML = `<div class="warn">${esc(err.message)}</div>`;
+    setOpen(2, true);
   } finally { btn.disabled = false; btn.textContent = "Get launch price"; }
 });
 
@@ -276,7 +369,6 @@ function renderResult(d) {
     return `<div class="mark${edge}" style="left:${p}%;color:${color}"><b>${rs(v)}</b>${label}</div>`;
   };
   $("result").innerHTML = `
-    <h2>2 · Recommended listing price</h2>
     <div class="big" id="bigPrice">${rs(rec.recommended_price)}</div>
     <div class="sub">Competitor band ${rs(m.band_low)} – ${rs(m.band_high)} (median ${rs(m.median_price)}) ·
       support: ${m.support} similar listings (${m.level})</div>
@@ -339,6 +431,7 @@ function renderResult(d) {
     acceptPrice(p);
   });
   update();
+  ACC[2].sum.textContent = rs(rec.recommended_price);
 }
 
 function showListed(listing) {
@@ -350,11 +443,11 @@ function showListed(listing) {
 function scrollChat() { chat.scrollTop = chat.scrollHeight; }
 function mine(text) {
   const b = document.createElement("div"); b.className = "bubble mine"; b.textContent = text;
-  chat.appendChild(b); scrollChat();
+  chat.appendChild(b); scrollChat(); afterChatAppend();
 }
 function bot(text) {
   const b = document.createElement("div"); b.className = "bubble"; b.textContent = text;
-  chat.appendChild(b); scrollChat(); return b;
+  chat.appendChild(b); scrollChat(); afterChatAppend(); return b;
 }
 function botCard(card) {
   const b = bot(card.text);
@@ -509,6 +602,8 @@ function renderThumbs(report) {
     add.title = "Add more photos"; add.innerHTML = '<span aria-hidden="true">+</span><span class="vh">Add more photos</span>';
     thumbs.appendChild(add);
   }
+  syncImageCount();
+  updateSum1();
 }
 
 function showPhotoError(msg) {
@@ -581,6 +676,10 @@ function applyPhotoReport(d) {
   html += `<div class="ps-note">${filled.length ? "Filled in: " + esc(filled.join(", ")) + ". Check them, then press Get launch price." : "Your form already matches the photos."}</div>`;
   $("photoStatus").innerHTML = html;
 }
+
+/* ---------- init ---------- */
+updateSum1();
+updateSum3();
 </script>
 </body>
 </html>

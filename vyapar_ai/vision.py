@@ -192,14 +192,40 @@ ATTRIBUTE_SCHEMA = {
 }
 
 PROMPT = (
-    "You are helping a new seller on an Indian marketplace list a product. "
-    "Look at all the photos of ONE product and fill in the JSON fields. "
-    "Use only the allowed values; answer 'unknown' (or 'other' for subcategory) "
-    "when the photos do not show it clearly. has_size_chart is true only if a "
-    "measurement or size chart is visible in a photo. has_fabric_label is true only "
-    "if a fabric, GSM or care label/card is visible. shots lists the kinds of shots "
-    "present. suggested_title is a short, plain English listing title such as "
-    "'Pink printed cotton kurti'. confidence is your confidence from 0 to 1.\n\n"
+    "You are helping a new seller on an Indian marketplace list ONE product. "
+    "Look at all the photos of that one product and fill in the JSON fields. "
+    "Use only the allowed values listed below. Answer 'unknown' (or 'other' for "
+    "subcategory) when the photos do not show something clearly.\n\n"
+    "Subcategory definitions (women's ethnic garments look alike - use these):\n"
+    "- saree: a long, unstitched garment draped around the body over a blouse, with a "
+    "pallu (the decorative end worn over the shoulder). A printed or cotton saree with "
+    "no special markers is plain 'saree'.\n"
+    "- synthetic_saree: a saree clearly in a synthetic fabric (polyester, georgette, "
+    "chiffon, art silk).\n"
+    "- banarasi_silk_saree: a heavy silk saree woven with zari/brocade (metallic gold or "
+    "silver thread and dense ornate motifs).\n"
+    "- kurti: a single stitched top/tunic with sleeves and a neckline, worn on its own "
+    "(not a drape).\n"
+    "- cotton_suit_set: a matching set sold together of a kurti/top PLUS a bottom "
+    "(salwar, palazzo or churidar) PLUS a dupatta.\n"
+    "- dupatta: only the scarf/stole; no main garment (no kurti, no saree) is shown.\n"
+    "- tshirt: a casual short-sleeved knit top with a round or V neck (not a button-up).\n"
+    "- casual_shirt: a woven button-up shirt with a collar and a full front button placket.\n"
+    "- bedsheet: a flat bed cover/sheet, often sold with matching pillow covers.\n"
+    "- cushion_cover: a removable cover for a throw pillow/cushion (home decor).\n\n"
+    "Disambiguation rules - follow these when the garment is ambiguous:\n"
+    "- If the garment is draped or unstitched and has a pallu, it is a SAREE: choose "
+    "'saree', 'synthetic_saree' or 'banarasi_silk_saree'. NEVER answer 'kurti' for a "
+    "draped garment.\n"
+    "- When you can see it is a saree but not which kind, prefer the generic 'saree'.\n"
+    "- 'kurti' is only for a stitched, sleeved top worn on its own; if it comes with a "
+    "matching bottom and dupatta as one set, use 'cotton_suit_set' instead.\n"
+    "- 'dupatta' is only when the scarf/stole is the product on its own.\n\n"
+    "Other fields: has_size_chart is true only if a measurement or size chart is visible "
+    "in a photo. has_fabric_label is true only if a fabric, GSM or care label/card is "
+    "visible. shots lists the kinds of shots present. suggested_title is a short, plain "
+    "English listing title such as 'Pink printed cotton saree'. confidence is your "
+    "confidence from 0 to 1.\n\n"
     "Allowed values:\n"
     f"subcategory: {', '.join(SUBCATEGORIES)}, other\n"
     f"fabric: {', '.join(FABRICS)}, unknown\n"
@@ -277,24 +303,46 @@ class ChatCompletionsVLM:
         self.headers = {"Authorization": f"Bearer {api_key}",
                         "Content-Type": "application/json"}
         self.client = client or httpx.Client(timeout=timeout)
+        self.last_error: Optional[str] = None
 
-    def build_request(self, photos: list[Photo]) -> dict:
+    def build_request(self, photos: list[Photo], json_schema: Optional[bool] = None) -> dict:
+        if json_schema is None:
+            json_schema = self.json_schema
         content: list[dict] = [{"type": "text", "text": PROMPT}]
         for p in photos:
             content.append({"type": "image_url", "image_url": {
                 "url": f"data:image/jpeg;base64,{p.jpeg_b64()}"}})
         body: dict = {"model": self.model, "temperature": 0,
                       "messages": [{"role": "user", "content": content}]}
-        if self.json_schema:
+        if json_schema:
             body["response_format"] = {"type": "json_schema", "json_schema": {
                 "name": "listing_attributes", "strict": True, "schema": ATTRIBUTE_SCHEMA}}
         return body
 
-    def extract(self, photos: list[Photo]) -> Optional[dict]:
-        r = self.client.post(self.url, headers=self.headers, json=self.build_request(photos))
+    def _post(self, body: dict) -> dict:
+        r = self.client.post(self.url, headers=self.headers, json=body)
         r.raise_for_status()
         text = r.json()["choices"][0]["message"]["content"]
         return _clean(_parse_json(text))
+
+    def extract(self, photos: list[Photo]) -> Optional[dict]:
+        self.last_error = None
+        try:
+            return self._post(self.build_request(photos))
+        except Exception as first:  # noqa: BLE001 - may be a json_schema rejection
+            if not self.json_schema:
+                self.last_error = f"{type(first).__name__}: {first}"[:300]
+                raise
+            # Some OpenAI-compatible endpoints/models reject response_format
+            # json_schema (e.g. HTTP 400). Retry ONCE without it before giving up.
+            try:
+                result = self._post(self.build_request(photos, json_schema=False))
+            except Exception:
+                # Both attempts failed: surface the original error, keep it recorded.
+                self.last_error = f"{type(first).__name__}: {first}"[:300]
+                raise first
+            self.last_error = None
+            return result
 
 
 class FallbackExtractor:

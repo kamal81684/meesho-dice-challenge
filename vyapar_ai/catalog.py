@@ -14,6 +14,10 @@ TAXONOMY: dict[str, dict[str, tuple[float, float, float, float]]] = {
     "women_ethnic": {
         "kurti": (279, 0.20, 0.18, 0.35),
         "cotton_suit_set": (385, 0.14, 0.12, 0.55),
+        # Generic printed/cotton saree: the catch-all when the saree type is
+        # not clearly synthetic or Banarasi silk. Without it a plain saree had
+        # no correct bucket and the vision model fell back to "kurti".
+        "saree": (399, 0.16, 0.14, 0.55),
         "synthetic_saree": (449, 0.18, 0.16, 0.60),
         "banarasi_silk_saree": (7200, 0.24, 0.10, 0.90),
         "dupatta": (189, 0.10, 0.12, 0.20),
