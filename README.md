@@ -47,6 +47,9 @@ tests/           unit tests (worked examples from Slide 3 included)
 Works on Python 3.9+. Jev (`typesafe-sdk`) needs Python 3.10+; on 3.9 it is
 skipped and the rules backend is used instead.
 
+On macOS, LightGBM needs OpenMP: `brew install libomp`. Without it the risk
+model falls back to scikit-learn's HistGradientBoosting automatically.
+
 ```bash
 pip install -r requirements.txt
 pytest -q

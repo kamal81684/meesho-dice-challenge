@@ -42,3 +42,22 @@ def test_higher_cod_share_raises_rto(catalog):
     low = model.predict(RiskFeatures("kurti", "women_ethnic", cod_share=0.5))[1]
     high = model.predict(RiskFeatures("kurti", "women_ethnic", cod_share=0.9))[1]
     assert high > low
+
+
+def test_risk_model_falls_back_when_lightgbm_cannot_load(monkeypatch, catalog):
+    import builtins
+    from sklearn.ensemble import HistGradientBoostingRegressor
+    real_import = builtins.__import__
+
+    def broken(name, *args, **kwargs):
+        if name == "lightgbm":
+            raise OSError("Library not loaded: @rpath/libomp.dylib")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", broken)
+    with pytest.warns(UserWarning, match="LightGBM unavailable"):
+        model = RiskModel()
+    assert isinstance(model.ret_model, HistGradientBoostingRegressor)
+    model.fit(catalog)
+    ret, rto = model.predict(RiskFeatures("kurti", "women_ethnic"))
+    assert 0.05 < ret < 0.5 and 0.05 < rto < 0.5

@@ -40,7 +40,11 @@ def _make_regressor():
         import lightgbm as lgb
         return lgb.LGBMRegressor(n_estimators=300, learning_rate=0.05, num_leaves=15,
                                  min_child_samples=20, verbose=-1)
-    except ImportError:  # pragma: no cover
+    except (ImportError, OSError) as e:
+        # OSError: LightGBM is installed but its native library cannot load,
+        # e.g. macOS without libomp (`brew install libomp`).
+        warnings.warn(f"LightGBM unavailable ({type(e).__name__}); "
+                      "using scikit-learn HistGradientBoosting instead.")
         from sklearn.ensemble import HistGradientBoostingRegressor
         return HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05)
 
