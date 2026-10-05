@@ -7,21 +7,37 @@ and gives the seller simple Hinglish nudges.
 
 ## Screenshots
 
-**Day-0 pricing screen.** You enter costs and get a launch price, the competitor band, return and RTO risk, a price slider and WhatsApp-style nudges.
+**Pricing screen.** The seller adds a photo and their costs and gets a launch
+price, the price range similar products sell for, the expected return risk, a
+price slider marked with break-even, safe price and market top, steps to
+reduce returns, and a WhatsApp preview.
 
-![Day-0 pricing screen](docs/images/day0-pricing.png)
+![Pricing screen](docs/images/day0-pricing.png)
 
-**Working nudge buttons.** In this run the seller adds a size chart (the product is re-priced), checks their own ₹240 against the floor, and lists the product.
+| Photo fills in the details | Recommended price |
+|---|---|
+| ![Product card filled from the photo](docs/images/photo-upload.png) | ![Recommended launch price with slider](docs/images/recommendation.png) |
 
-![Nudge actions in the chat panel](docs/images/nudge-actions.png)
+| Reduce returns | WhatsApp preview |
+|---|---|
+| ![Steps to reduce returns](docs/images/improve-returns.png) | ![WhatsApp message preview](docs/images/whatsapp-preview.png) |
 
-**Price slider on mobile.** Drag it to see the margin at any price against the break-even, floor and band top.
+**Photo check pop-up.** Shown when a photo is blurry, dark, low resolution or
+not a product photo, with a one-tap way to replace it.
 
-<img src="docs/images/mobile.png" alt="Price slider on a phone" width="320">
+![Photo check pop-up](docs/images/photo-check-popup.png)
+
+**On a phone.**
+
+<img src="docs/images/mobile.png" alt="Recommended price on a phone" width="320">
 
 **Architecture page** (`docs/architecture.html`, served at `/architecture`).
 
 ![Architecture page](docs/images/architecture.png)
+
+> The screenshots use a stand-in vision model, so category, fabric and pattern
+> are filled in. Without `VISION_MODEL` set, only the colour and photo-quality
+> checks fill in automatically.
 
 ## Effort estimate
 
@@ -149,7 +165,8 @@ answer. That fits Sarvam's API (`VISION_API_BASE=https://api.sarvam.ai/v1`) or
 a self-hosted model. The model's answer is checked against the allowed values,
 and anything unexpected is dropped. If the call fails, the photo checks still
 answer. Photo problems (blurry, dark, small) slightly raise the predicted return
-rate, and each one becomes a Hinglish tip in the chat.
+rate, and the seller sees them in a photo-check pop-up with a one-tap way to
+replace the photo.
 
 ### Doc-AI digitise step (`vyapar_ai/vision.py`)
 
@@ -163,7 +180,7 @@ to the vision model alongside the images as a hint, so the model gets both the
 OCR text and the picture. If the Doc-AI step fails, the model still runs on the
 images alone, and if that fails the pixel checks still answer.
 
-![Photo upload filling the form](docs/images/photo-upload.png)
+![Product card filled from the photo](docs/images/photo-upload.png)
 
 OCR is not needed. Attributes come from what the photo shows. Reading printed
 measurements on a size chart would be an OCR or document-model step, which
